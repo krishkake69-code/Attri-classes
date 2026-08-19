@@ -16,10 +16,17 @@ app.use(express.urlencoded({ limit: '15mb', extended: true }));
 // Security headers and settings (Rule 7: HTTP Security Headers)
 app.disable('x-powered-by');
 app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // CORS setup for Vercel
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
   next();
 });
+
+// Initialization moved to bottom conditional export
 
 // Custom Zero-Dependency In-Memory Rate Limiter (Rule 2: Rate Limiting)
 interface RateLimitRecord {
@@ -264,4 +271,11 @@ async function initServer() {
   });
 }
 
-initServer();
+// Export for Vercel or start server locally
+if (process.env.VERCEL) {
+  // Vercel will handle requests; export as handler
+  export default app;
+} else {
+  // Start server in non‑Vercel environments
+  initServer();
+}
