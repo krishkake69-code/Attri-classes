@@ -1,9 +1,18 @@
-import { kv } from '@vercel/kv';
-
 const DATA_KEY = 'attri:data-store';
+
+let kvClient: any = null;
+
+async function getKv() {
+  if (!kvClient) {
+    const { kv } = await import('@vercel/kv');
+    kvClient = kv;
+  }
+  return kvClient;
+}
 
 export async function readDataStore() {
   try {
+    const kv = await getKv();
     const data = await kv.get(DATA_KEY);
     if (data) return data;
   } catch (err) {
@@ -14,6 +23,7 @@ export async function readDataStore() {
 
 export async function writeDataStore(data: any) {
   try {
+    const kv = await getKv();
     await kv.set(DATA_KEY, data);
     return true;
   } catch (err) {
