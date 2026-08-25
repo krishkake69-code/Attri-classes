@@ -52,6 +52,10 @@ export default function App() {
   const handleSaveContent = async (updatedData: any) => {
     try {
       const token = localStorage.getItem('attri_admin_token');
+      if (!token) {
+        console.error('No admin token found');
+        return false;
+      }
       const res = await fetch('/api/content', {
         method: 'PUT',
         headers: {
@@ -60,14 +64,18 @@ export default function App() {
         },
         body: JSON.stringify(updatedData)
       });
-      if (res.ok) {
+      const result = await res.json();
+      if (res.ok && result.success) {
         setDynamicData(updatedData);
         return true;
+      } else {
+        console.error('Save failed:', result.error || 'Unknown error');
+        return false;
       }
     } catch (err) {
       console.error('Error saving dynamic content to backend:', err);
+      return false;
     }
-    return false;
   };
 
   return (

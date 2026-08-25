@@ -1614,6 +1614,7 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
               </AnimatePresence>
 
               <button 
+                type="button"
                 onClick={handleSaveAll}
                 disabled={isSaving}
                 className="bg-blue-900 hover:bg-blue-950 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
