@@ -1,35 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import fs from 'fs';
-import path from 'path';
-
-const dataFilePath = path.join(process.cwd(), 'src', 'data-store.json');
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'AttriChem2026Admin!';
-const ADMIN_TOKEN = 'attri_session_token_' + ADMIN_PASSWORD.split('').reverse().join('');
-
-function readDataStore() {
-  try {
-    if (fs.existsSync(dataFilePath)) {
-      const dataStr = fs.readFileSync(dataFilePath, 'utf8');
-      return JSON.parse(dataStr);
-    }
-  } catch (err) {
-    console.error('Error reading data file:', err);
-  }
-  return null;
-}
-
-function writeDataStore(data: any) {
-  try {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (err) {
-    console.error('Error writing to data file:', err);
-    return false;
-  }
-}
+import { readDataStore, writeDataStore, getAdminToken } from '../lib/kv-store';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
+  const ADMIN_TOKEN = getAdminToken();
 
   if (req.method === 'POST') {
     const { name, phone, email, course, message, type } = req.body;
@@ -37,8 +11,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ success: false, error: 'Name and Phone are required.' });
     }
 
-    const fileData = readDataStore() || {};
-    const inquiries = fileData.inquiries || [];
+    const data = await readDataStore() || {};
+    const inquiries = data.inquiries || [];
 
     const newInquiry = {
       id: 'inq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
@@ -53,8 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
 
     inquiries.unshift(newInquiry);
-    fileData.inquiries = inquiries;
-    writeDataStore(fileData);
+    data.inquiries = inquiries;
+    await writeDataStore(data);
 
     return res.json({ success: true, message: 'Your booking has been registered successfully!' });
   }
@@ -65,8 +39,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const fileData = readDataStore() || {};
-    return res.json(fileData.inquiries || []);
+    const data = await readDataStore() || {};
+    return res.json(data.inquiries || []);
   }
 
   if (id && req.method === 'PUT') {
@@ -75,13 +49,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const fileData = readDataStore() || {};
-    const inquiries = fileData.inquiries || [];
+    const data = await readDataStore() || {};
+    const inquiries = data.inquiries || [];
     const inquiry = inquiries.find((inq: any) => inq.id === id);
     if (inquiry) {
       inquiry.read = !inquiry.read;
-      fileData.inquiries = inquiries;
-      writeDataStore(fileData);
+      data.inquiries = inquiries;
+      await writeDataStore(data);
       return res.json({ success: true, inquiries });
     }
     return res.status(404).json({ success: false, error: 'Inquiry not found' });
@@ -93,11 +67,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const fileData = readDataStore() || {};
-    const inquiries = fileData.inquiries || [];
+    const data = await readDataStore() || {};
+    const inquiries = data.inquiries || [];
     const filtered = inquiries.filter((inq: any) => inq.id !== id);
-    fileData.inquiries = filtered;
-    writeDataStore(fileData);
+    data.inquiries = filtered;
+    await writeDataStore(data);
 
     return res.json({ success: true, inquiries: filtered });
   }
