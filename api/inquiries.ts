@@ -1,5 +1,32 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { readDataStore, writeDataStore, ADMIN_TOKEN } from '../server-utils';
+import fs from 'fs';
+import path from 'path';
+
+const dataFilePath = path.join(process.cwd(), 'src', 'data-store.json');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'AttriChem2026Admin!';
+const ADMIN_TOKEN = 'attri_session_token_' + ADMIN_PASSWORD.split('').reverse().join('');
+
+function readDataStore() {
+  try {
+    if (fs.existsSync(dataFilePath)) {
+      const dataStr = fs.readFileSync(dataFilePath, 'utf8');
+      return JSON.parse(dataStr);
+    }
+  } catch (err) {
+    console.error('Error reading data file:', err);
+  }
+  return null;
+}
+
+function writeDataStore(data: any) {
+  try {
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error writing to data file:', err);
+    return false;
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { id } = req.query;
