@@ -1,0 +1,6 @@
+{
+  "name": "Attri Chemistry Classes",
+  "description": "Premium educational coaching platform for NEET, JEE, Boards & Competitive Chemistry Exams with student portals, dynamic learning materials, and modern UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
