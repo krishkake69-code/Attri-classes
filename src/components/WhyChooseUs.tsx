@@ -1,64 +1,90 @@
-import { FEATURES } from '../data';
-import { motion } from 'motion/react';
-import * as LucideIcons from 'lucide-react';
+import { BENTO_FEATURES } from '../data';
+import { motion, useReducedMotion } from 'motion/react';
+
+const SPANS = [
+  'sm:col-span-2 lg:col-span-2 lg:row-span-2',
+  'lg:col-span-1',
+  'lg:col-span-1',
+  'sm:col-span-2 lg:col-span-2',
+  'sm:col-span-2 lg:col-span-2',
+  'sm:col-span-2 lg:col-span-2',
+];
 
 export default function WhyChooseUs() {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section
-      id="why-us"
-      className="py-20 md:py-28 bg-white dark:bg-slate-900 transition-colors duration-300 relative overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-sm font-black tracking-widest text-blue-600 dark:text-orange-500 uppercase mb-2">
-            Why Choose Us
+    <section id="why-us" className="border-b border-line bg-surface">
+      <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
+        <div className="max-w-2xl">
+          <h2 className="font-display text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl lg:text-5xl">
+            What the fee actually buys
           </h2>
-          <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            How We Bridge the Gap from Confusion to Mastery
+          <p className="mt-5 max-w-[58ch] text-base leading-relaxed text-ink-soft">
+            No auditorium lectures, no rotating faculty, no unused app subscription. Six things,
+            every one of them used weekly.
           </p>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base">
-            Our pedagogical framework combines classic traditional teacher mentorship with ultra-modern analytical tracking dashboards.
-          </p>
-          <div className="w-16 h-1 bg-gradient-to-r from-blue-600 to-orange-500 mx-auto mt-4 rounded-full" />
         </div>
 
-        {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {FEATURES.map((feature, idx) => {
-            // Dynamically resolve icon from Lucide
-            const IconComponent = (LucideIcons as any)[feature.iconName] || LucideIcons.HelpCircle;
+        <div className="mt-14 grid grid-flow-dense grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[minmax(190px,auto)] lg:grid-cols-4">
+          {BENTO_FEATURES.map((feature, index) => {
+            const isImage = feature.variant === 'image';
+            const isAccent = feature.variant === 'accent';
+            const isPattern = feature.variant === 'pattern';
 
             return (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                className="bg-slate-50 dark:bg-slate-950 p-6 sm:p-8 rounded-2xl border border-slate-100 dark:border-slate-850 flex flex-col justify-between group relative shadow-sm hover:shadow-xl transition-all"
+              <motion.article
+                key={feature.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{
+                  duration: 0.55,
+                  delay: reduceMotion ? 0 : index * 0.05,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className={`flex flex-col rounded-[1.5rem] border border-line p-7 ${SPANS[index]} ${
+                  isAccent ? 'bg-accent-soft' : 'bg-surface-muted/50'
+                }`}
+                style={
+                  isPattern
+                    ? {
+                        backgroundImage:
+                          'radial-gradient(var(--line-strong) 1px, transparent 1px)',
+                        backgroundSize: '20px 20px',
+                      }
+                    : undefined
+                }
               >
-                {/* Visual Glow Backdrop */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-orange-500/0 to-orange-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
-                <div className="space-y-4 relative z-10">
-                  {/* Icon wrap with colorful gradient background */}
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center text-white shadow-lg shadow-blue-500/10`}>
-                    <IconComponent className="w-6 h-6 stroke-[2]" />
-                  </div>
-
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                <div className={isImage ? '' : 'flex-1'}>
+                  <p className="font-mono text-2xl font-medium text-ink sm:text-3xl">
+                    {feature.stat}
+                  </p>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-faint">
+                    {feature.statLabel}
+                  </p>
+                  <h3 className="mt-5 font-display text-lg font-semibold text-ink">
                     {feature.title}
                   </h3>
-
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-ink-soft">
                     {feature.description}
                   </p>
                 </div>
-              </motion.div>
+
+                {isImage && feature.image && (
+                  <img
+                    src={feature.image}
+                    alt="Chemistry laboratory glassware used during practical demonstration classes"
+                    width={1200}
+                    height={750}
+                    loading="lazy"
+                    className="mt-7 aspect-[16/10] w-full rounded-2xl border border-line object-cover"
+                  />
+                )}
+              </motion.article>
             );
           })}
         </div>
-
       </div>
     </section>
   );

@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 import { kv } from '@vercel/kv';
+
+dotenv.config({ path: '.env.local' });
 
 const dataFilePath = path.join(process.cwd(), 'src', 'data-store.json');
 const DATA_KEY = 'attri:data-store';
