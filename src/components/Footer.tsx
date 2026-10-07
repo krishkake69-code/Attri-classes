@@ -146,9 +146,9 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
                 </a>
               </li>
               <li className="leading-relaxed">
-                3rd Floor, Golden Plaza,
+                H-489 Govindpuram,
                 <br />
-                Sector 15, New Delhi 110001
+                Ghaziabad, Uttar Pradesh
               </li>
               <li className="pt-1 font-mono text-xs text-ink-faint">
                 Mon to Sun, 9:00 AM to 7:00 PM

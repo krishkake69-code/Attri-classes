@@ -22,8 +22,8 @@ const DEFAULT_CENTERS = [
   {
     id: 'center-1',
     name: 'Main Campus',
-    address: '3rd Floor, Golden Plaza, Opp. Medical College Road, Sector 15, New Delhi 110001',
-    details: 'Main commercial hub, two minutes from the metro station',
+    address: 'H-489 Govindpuram, Ghaziabad, Uttar Pradesh',
+    details: 'Near Spring Dales School',
   },
 ];
 

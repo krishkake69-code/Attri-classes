@@ -812,7 +812,7 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
                                     <textarea 
                                       value={center.address}
                                       onChange={(e) => updateCenterField(index, 'address', e.target.value)}
-                                      placeholder="3rd Floor, Golden Plaza, Sector 15..."
+                                      placeholder="H-489 Govindpuram, Ghaziabad..."
                                       rows={2}
                                       className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-transparent text-xs outline-none"
                                     />

@@ -242,14 +242,8 @@
     {
       "id": "center-1",
       "name": "Main Campus",
-      "address": "3rd Floor, Golden Plaza, Opp. Medical College Road, Sector 15, New Delhi - 110001",
-      "details": "Main Commercial Hub Area (1 Min walk from Sector-15 Metro)"
-    },
-    {
-      "id": "center-2",
-      "name": "East Delhi Center",
-      "address": "2nd Floor, Science Tower, Near Preet Vihar Metro Gate 3, Delhi - 110092",
-      "details": "Branch Center - Labs & Self Study Hub"
+      "address": "H-489 Govindpuram, Ghaziabad, Uttar Pradesh",
+      "details": "Near Spring Dales School"
     }
   ]
 }
