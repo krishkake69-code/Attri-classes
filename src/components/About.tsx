@@ -1,118 +1,100 @@
-import { motion } from 'motion/react';
-import { Award, Target, Eye, Users, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { Check } from 'lucide-react';
+
+const MENTOR_IMAGE =
+  'https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&q=80&w=1200&h=900';
+
+const CREDENTIALS = [
+  'M.Sc. Chemistry, University of Delhi',
+  '11 years of NEET and JEE classroom teaching',
+  'Author of the printed reaction-map booklets',
+  '268 selections mentored since 2016',
+];
 
 export default function About() {
-  const highlights = [
-    {
-      title: 'Experienced Faculty',
-      desc: 'Learn directly from Attri Sir, a seasoned expert with over 10 years of mentoring students to national ranks in JEE and NEET.',
-      icon: GraduationCap,
-      color: 'text-blue-500 bg-blue-50 dark:bg-blue-950/40'
-    },
-    {
-      title: 'Concept-Based Learning',
-      desc: 'We discard memory formulas. Our methodology prioritizes reaction mechanisms, physical logic, and logical deduction.',
-      icon: Target,
-      color: 'text-orange-500 bg-orange-50 dark:bg-orange-950/40'
-    },
-    {
-      title: 'Regular Assessment & Tests',
-      desc: 'Weekly topic-wise tests and monthly standardized examinations styled exactly to NTA and NEET templates.',
-      icon: Award,
-      color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40'
-    },
-    {
-      title: 'Personalized Guidance',
-      desc: 'Doubt-solving counters, progress monitoring, and psychological mentorship to keep stress away and performance high.',
-      icon: Users,
-      color: 'text-purple-500 bg-purple-50 dark:bg-purple-950/40'
-    }
-  ];
+  const reduceMotion = useReducedMotion();
 
   return (
-    <section
-      id="about"
-      className="py-20 md:py-28 bg-white dark:bg-slate-900 transition-colors duration-300 relative overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Section Title */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-sm font-black tracking-widest text-blue-600 dark:text-orange-500 uppercase mb-2">
-            Who We Are
-          </h2>
-          <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Nurturing Future Scholars & Doctors Since 2016
-          </p>
-          <div className="w-16 h-1 bg-gradient-to-r from-blue-600 to-orange-500 mx-auto mt-4 rounded-full" />
-        </div>
+    <section id="about" className="border-b border-line bg-surface">
+      <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
+        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5"
+          >
+            <div className="overflow-hidden rounded-[2rem] border border-line bg-surface-muted p-2">
+              <img
+                src={MENTOR_IMAGE}
+                alt="A Class 11 chemistry batch during a lecture at the Sector 15 campus"
+                width={1200}
+                height={900}
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-[1.5rem] object-cover"
+              />
+            </div>
+            <blockquote className="mt-8 border-l-2 border-accent pl-5">
+              <p className="font-display text-lg leading-snug text-ink">
+                &ldquo;A reaction is never random. If it looks random, the explanation started in
+                the wrong place.&rdquo;
+              </p>
+              <footer className="mt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">
+                Attri Sir, Founder and Faculty
+              </footer>
+            </blockquote>
+          </motion.div>
 
-        {/* Content Layout Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Text Block */}
-          <div className="lg:col-span-6 space-y-6">
-            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-              Welcome to ATTRI CHEMISTRY CLASSES
-            </h3>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base sm:text-lg">
-              At Attri Chemistry Classes, we believe that chemistry is not just a subject to pass—it is the foundational science of understanding how our physical universe exists. Led by elite chemistry mentor <span className="font-bold text-slate-950 dark:text-white">Attri Sir</span>, our institute has established a stellar legacy of converting average science scorers into board toppers and top-100 rankers in NEET and JEE.
-            </p>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
-              Through immersive models, NCERT-focused memory charts, and extensive numerical practice sessions, we make even the dreaded organic chemical equations intuitive and fun.
-            </p>
+          <div className="lg:col-span-7">
+            <h2 className="font-display text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl lg:text-5xl">
+              The mentor behind the method
+            </h2>
+            <div className="mt-6 space-y-5 text-base leading-relaxed text-ink-soft">
+              <p className="max-w-[65ch]">
+                Attri Sir has taught chemistry for eleven years, most of them to students who
+                arrived convinced the subject was beyond them. Classes start on the board, not in
+                the textbook: electron movement first, mechanism second, exceptions last.
+              </p>
+              <p className="max-w-[65ch]">
+                The institute opened in 2016 with one batch and a single rule. No student moves to
+                the next chapter with an unanswered question from the last one. Every feature on
+                this page exists to enforce that rule.
+              </p>
+            </div>
 
-            {/* Mission & Vision Side-by-Side Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-base mb-2">
-                  <Target className="w-5 h-5 text-orange-500" />
-                  <span>Our Mission</span>
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
-                  To democratize elite level science education by breaking complex academic formulas into simplistic, understandable chemical logic.
+            <ul className="mt-9 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              {CREDENTIALS.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-ink">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+                    <Check className="h-3 w-3" strokeWidth={2.5} />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-12 grid gap-8 border-t border-line pt-8 sm:grid-cols-2">
+              <div>
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-faint">
+                  Mission
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                  Make serious chemistry coaching affordable and understandable for every student,
+                  whatever their school background.
                 </p>
               </div>
-
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-extrabold text-base mb-2">
-                  <Eye className="w-5 h-5 text-blue-500" />
-                  <span>Our Vision</span>
-                </div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
-                  To remain the premier chemistry coaching house where every medical and engineering seat aspirant accomplishes their maximum potential.
+              <div>
+                <h3 className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-faint">
+                  Vision
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                  Stay the institute where a 40-mark student becomes a 90-mark student, not just a
+                  place where toppers enrol.
                 </p>
               </div>
             </div>
           </div>
-
-          {/* Right Highlights Column */}
-          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {highlights.map((h, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -5 }}
-                className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 shadow-sm flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  <div className={`p-3 rounded-xl w-fit ${h.color}`}>
-                    <h.icon className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">
-                    {h.title}
-                  </h4>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                    {h.desc}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-orange-400 pt-3">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Verified Standard</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
         </div>
       </div>
     </section>

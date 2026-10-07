@@ -1,6 +1,7 @@
+import { useRef } from 'react';
 import { RESULTS } from '../data';
-import { motion } from 'motion/react';
-import { Award, Trophy, MapPin, Sparkles, GraduationCap } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { ResultItem } from '../types';
 
 interface ResultsProps {
@@ -8,98 +9,103 @@ interface ResultsProps {
 }
 
 export default function Results({ results }: ResultsProps) {
-  const resultsToDisplay = results || RESULTS;
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReducedMotion();
+  const resultsToDisplay = results ?? RESULTS;
+
+  const scrollByCard = (direction: 1 | -1) => {
+    const track = trackRef.current;
+    if (!track) return;
+    track.scrollBy({ left: direction * 360, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
 
   return (
-    <section
-      id="results"
-      className="py-20 md:py-28 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-sm font-black tracking-widest text-blue-600 dark:text-orange-500 uppercase mb-2">
-            Hall of Fame
-          </h2>
-          <p className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Our Champions of Chemistry
-          </p>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm sm:text-base">
-            Hard work meets expert conceptual guidance. Meet our top-scoring students admitted into premium medical colleges and IITs.
-          </p>
-          <div className="w-16 h-1 bg-gradient-to-r from-blue-600 to-orange-500 mx-auto mt-4 rounded-full" />
-        </div>
- 
-        {/* Top Highlight Topper Card */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {resultsToDisplay.map((res, index) => (
-            <motion.div
-              key={res.id}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
-              className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-md hover:shadow-xl transition-shadow flex flex-col group"
+    <section id="results" className="border-b border-line bg-canvas">
+      <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
+        <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <h2 className="font-display text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl lg:text-5xl">
+              Champions of chemistry
+            </h2>
+            <p className="mt-5 max-w-[58ch] text-base leading-relaxed text-ink-soft">
+              Scorecards presented at the centre, listed without rounding. Five of the 268
+              selections since 2016.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => scrollByCard(-1)}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-ink"
+              aria-label="Scroll to previous results"
             >
-              {/* Photo Box with Badge overlays */}
-              <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-950">
-                <img
-                  src={res.image}
-                  alt={res.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                
-                {/* Visual Glassmorphic gradient band */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+            </button>
+            <button
+              onClick={() => scrollByCard(1)}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:border-ink"
+              aria-label="Scroll to next results"
+            >
+              <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
+            </button>
+          </div>
+        </div>
 
-                {/* Score badge top-left */}
-                <div className="absolute top-4 left-4 bg-orange-500 text-white font-extrabold text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-                  <Trophy className="w-3.5 h-3.5" />
-                  <span>{res.rank}</span>
-                </div>
-
-                {/* Exam Title overlay bottom-left */}
-                <div className="absolute bottom-4 left-4 text-white">
-                  <p className="text-xs font-bold text-orange-400 uppercase tracking-widest">
-                    {res.exam} • Year {res.year}
-                  </p>
-                  <p className="text-lg font-black tracking-tight mt-0.5">
-                    {res.name}
-                  </p>
-                </div>
+        <div
+          ref={trackRef}
+          className="no-scrollbar mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4"
+        >
+          {resultsToDisplay.map((result, index) => (
+            <motion.article
+              key={result.id}
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: 0.5,
+                delay: reduceMotion ? 0 : Math.min(index, 3) * 0.06,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className={`w-[82vw] shrink-0 snap-start rounded-[1.5rem] border p-7 sm:w-[330px] ${
+                index === 0 ? 'border-accent bg-accent-soft' : 'border-line bg-surface'
+              }`}
+            >
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+                {result.exam} / {result.year}
+              </p>
+              <p
+                className={`mt-5 font-mono text-4xl font-medium tracking-tight ${
+                  index === 0 ? 'text-accent' : 'text-ink'
+                }`}
+              >
+                {result.rank}
+              </p>
+              <h3 className="mt-5 font-display text-xl font-semibold text-ink">{result.name}</h3>
+              <div className="mt-6 border-t border-line pt-5">
+                <p className="font-mono text-sm text-ink">{result.score}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">{result.achievement}</p>
               </div>
-
-              {/* Card Footer detail */}
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-sm font-black">
-                    <Award className="w-4 h-4 text-orange-500" />
-                    <span>{res.score}</span>
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-300 text-sm italic font-medium leading-relaxed">
-                    "{res.achievement}"
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400">
-                  <GraduationCap className="w-4 h-4 text-emerald-500" />
-                  <span>Verified Classroom Alumnus</span>
-                </div>
-              </div>
-            </motion.div>
+            </motion.article>
           ))}
         </div>
 
-        {/* Motivational Quote banner */}
-        <div className="mt-16 text-center max-w-2xl mx-auto p-6 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100/35 dark:border-blue-900/35">
-          <Sparkles className="w-5 h-5 text-orange-500 mx-auto mb-2 animate-bounce" />
-          <p className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 italic">
-            "Your photo could be here next year. Our next super-batch has limited slots. Begin your conceptual chemistry journey today."
-          </p>
-        </div>
+        <p className="mt-6 text-xs text-ink-faint">
+          {resultsToDisplay.length > 0
+            ? 'Names and scores shared with permission of students and parents.'
+            : ''}
+        </p>
 
+        {resultsToDisplay.length === 0 && (
+          <div className="mt-12 rounded-[1.5rem] border border-dashed border-line-strong bg-surface p-12 text-center">
+            <p className="font-display text-lg font-semibold text-ink">
+              Results are being updated
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
+              Scorecards for this season are published as soon as families approve them. Call the
+              desk for the current list.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
