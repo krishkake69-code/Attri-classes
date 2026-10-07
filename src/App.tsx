@@ -136,7 +136,13 @@ export default function App() {
               data={
                 dynamicData || {
                   admissionMessage: '',
-                  stats: { studentsCount: '', successRate: '', experience: '' },
+                  stats: [],
+                  heroContent: { headline: '', subheadline: '' },
+                  aboutContent: { heading: '', paragraph1: '', paragraph2: '' },
+                  methodology: [],
+                  features: [],
+                  faqs: [],
+                  batches: [],
                   courses: [],
                   results: [],
                   testimonials: [],
