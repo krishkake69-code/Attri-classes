@@ -1,6 +1,11 @@
 import { BATCH_SCHEDULE } from '../data';
 
-export default function BatchSchedule() {
+import { BatchSlot } from '../types';
+
+interface BatchProps {
+  batches?: BatchSlot[];
+}
+export default function BatchSchedule({ batches }: BatchProps) {
   return (
     <section id="batches" className="border-b border-line bg-surface">
       <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
@@ -24,7 +29,7 @@ export default function BatchSchedule() {
             <span className="col-span-1 text-right">Mode</span>
           </div>
 
-          {BATCH_SCHEDULE.map((slot) => {
+          {(batches || BATCH_SCHEDULE).map((slot) => {
             const fewSeatsLeft = slot.seatsLeft <= 5;
 
             return (

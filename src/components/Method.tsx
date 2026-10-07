@@ -1,7 +1,12 @@
 import { METHOD_STEPS } from '../data';
 import { motion, useReducedMotion } from 'motion/react';
 
-export default function Method() {
+import { MethodStep } from '../types';
+
+interface MethodProps {
+  methodology?: MethodStep[];
+}
+export default function Method({ methodology }: MethodProps) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -18,7 +23,7 @@ export default function Method() {
         </div>
 
         <div className="mt-14 grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-          {METHOD_STEPS.map((step, index) => (
+          {(methodology || METHOD_STEPS).map((step, index) => (
             <motion.div
               key={step.title}
               initial={reduceMotion ? false : { opacity: 0, y: 20 }}

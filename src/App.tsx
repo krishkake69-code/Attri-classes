@@ -102,19 +102,19 @@ export default function App() {
       </header>
 
       <main id="main-content" className="overflow-x-hidden">
-        <Hero />
+        <Hero content={dynamicData?.heroContent} />
         <ElementTicker />
         <Stats stats={dynamicData?.stats} />
-        <Method />
-        <About />
+        <Method methodology={dynamicData?.methodology} />
+        <About content={dynamicData?.aboutContent} />
         <Courses courses={dynamicData?.courses} />
-        <WhyChooseUs />
+        <WhyChooseUs features={dynamicData?.features} />
         <Results results={dynamicData?.results} />
         <InteractiveChemistryQuiz />
         <Testimonials testimonials={dynamicData?.testimonials} />
         <Gallery items={dynamicData?.gallery} />
-        <BatchSchedule />
-        <FAQ />
+        <BatchSchedule batches={dynamicData?.batches} />
+        <FAQ faqs={dynamicData?.faqs} />
         <Contact contactInfo={dynamicData?.contactInfo} centers={dynamicData?.centers} />
       </main>
 

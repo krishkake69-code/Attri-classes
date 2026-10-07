@@ -10,7 +10,12 @@ const SPANS = [
   'sm:col-span-2 lg:col-span-2',
 ];
 
-export default function WhyChooseUs() {
+import { BentoFeature } from '../types';
+
+interface WCUProps {
+  features?: BentoFeature[];
+}
+export default function WhyChooseUs({ features }: WCUProps) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -27,7 +32,7 @@ export default function WhyChooseUs() {
         </div>
 
         <div className="mt-14 grid grid-flow-dense grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[minmax(190px,auto)] lg:grid-cols-4">
-          {BENTO_FEATURES.map((feature, index) => {
+          {(features || BENTO_FEATURES).map((feature, index) => {
             const isImage = feature.variant === 'image';
             const isAccent = feature.variant === 'accent';
             const isPattern = feature.variant === 'pattern';
