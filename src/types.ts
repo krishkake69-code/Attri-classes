@@ -109,3 +109,16 @@ export interface ElementTile {
   number: number;
   name: string;
 }
+
+export interface SiteContent {
+  heroHeadline: string;
+  heroSubheadline: string;
+  aboutHeading: string;
+  aboutParagraph1: string;
+  aboutParagraph2: string;
+  stats: { label: string; value: string; note: string }[];
+  methodology: { title: string; detail: string }[];
+  features: { title: string; description: string; stat: string; statLabel: string; variant: 'image' | 'accent' | 'pattern' | 'plain'; image?: string }[];
+  faqs: { question: string; answer: string }[];
+  batches: { id: string; batch: string; audience: string; days: string; time: string; seatsLeft: number; seatsTotal: number; mode: string }[];
+}

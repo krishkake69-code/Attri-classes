@@ -11,7 +11,10 @@ const CREDENTIALS = [
   '268 selections mentored since 2016',
 ];
 
-export default function About() {
+interface AboutProps {
+  content?: { heading: string; paragraph1: string; paragraph2: string };
+}
+export default function About({ content }: AboutProps) {
   const reduceMotion = useReducedMotion();
 
   return (

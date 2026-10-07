@@ -1,7 +1,12 @@
 import { FAQS } from '../data';
 import { Plus } from 'lucide-react';
 
-export default function FAQ() {
+import { FaqItem } from '../types';
+
+interface FAQProps {
+  faqs?: FaqItem[];
+}
+export default function FAQ({ faqs }: FAQProps) {
   return (
     <section id="faq" className="border-b border-line bg-canvas">
       <div className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
@@ -20,7 +25,7 @@ export default function FAQ() {
 
           <div className="lg:col-span-8">
             <div className="border-t border-line">
-              {FAQS.map((faq) => (
+              {(faqs || FAQS).map((faq) => (
                 <details key={faq.question} className="group border-b border-line">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 [&::-webkit-details-marker]:hidden">
                     <span className="font-display text-lg font-medium text-ink">

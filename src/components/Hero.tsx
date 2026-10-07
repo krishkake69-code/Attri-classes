@@ -5,7 +5,10 @@ import ChemistryParticles from './ChemistryParticles';
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1554475901-4538ddfbccc2?auto=format&fit=crop&q=80&w=1200&h=1500';
 
-export default function Hero() {
+interface HeroProps {
+  content?: { headline: string; subheadline: string };
+}
+export default function Hero({ content }: HeroProps) {
   const reduceMotion = useReducedMotion();
 
   const scrollTo = (id: string) => {
