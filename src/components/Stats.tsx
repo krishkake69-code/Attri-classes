@@ -2,7 +2,6 @@ import { motion, useReducedMotion } from 'motion/react';
 
 interface StatsProps {
   stats?: { label: string; value: string; note: string }[];
-};
 }
 
 export default function Stats({ stats }: StatsProps) {
