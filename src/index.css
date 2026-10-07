@@ -1,28 +1,102 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;650;700;800;900&family=Outfit:wght@400;500;600;750;800;900&display=swap');
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/outfit";
+@import "@fontsource-variable/geist-mono";
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", "Inter", sans-serif;
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --canvas: #faf8f5;
+  --surface: #ffffff;
+  --surface-muted: #f2eee7;
+  --ink: #1b1815;
+  --ink-soft: #4d463d;
+  --ink-faint: #6f675d;
+  --line: rgba(27, 24, 21, 0.12);
+  --line-strong: rgba(27, 24, 21, 0.22);
+  --accent: #a8431a;
+  --accent-strong: #8c3613;
+  --accent-soft: #f6e7dd;
+  --on-accent: #ffffff;
+  --shadow-soft: 0 1px 2px rgba(27, 24, 21, 0.05), 0 18px 40px -24px rgba(27, 24, 21, 0.28);
+}
+
+.dark {
+  --canvas: #151311;
+  --surface: #1d1a17;
+  --surface-muted: #26221e;
+  --ink: #f4f0ea;
+  --ink-soft: #c6bfb4;
+  --ink-faint: #968d80;
+  --line: rgba(244, 240, 234, 0.14);
+  --line-strong: rgba(244, 240, 234, 0.26);
+  --accent: #e07a48;
+  --accent-strong: #f08a55;
+  --accent-soft: rgba(224, 122, 72, 0.14);
+  --on-accent: #1b1815;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -24px rgba(0, 0, 0, 0.65);
+}
+
+@theme inline {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit Variable", "Geist Variable", ui-sans-serif, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 80px; /* height of sticky header */
+  scroll-padding-top: 128px;
 }
 
-/* Base style resets */
 body {
+  background-color: var(--canvas);
+  color: var(--ink);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01" 1, "cv05" 1;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
+  text-wrap: balance;
 }
 
-/* Smooth custom scrollbars */
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -30,14 +104,63 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 5px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--canvas);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--ink-faint);
+}
+
+@keyframes element-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: element-marquee 60s linear infinite;
+}
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .marquee-track {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

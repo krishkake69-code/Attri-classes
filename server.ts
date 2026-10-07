@@ -1,8 +1,8 @@
 import express from 'express';
 import path from 'path';
-import fs from 'fs';
 import dotenv from 'dotenv';
 import { createServer as createViteServer } from 'vite';
+import { readDataStore, writeDataStore, ADMIN_TOKEN, ADMIN_PASSWORD } from './server-utils.js';
 
 dotenv.config();
 
@@ -70,37 +70,14 @@ const saveLimiter = createRateLimiter(
   "Too many content saving requests. Please wait a minute."
 );
 
-const dataFilePath = path.join(process.cwd(), 'src', 'data-store.json');
-
-// Helper to read data safely with fallback
-function readDataStore() {
-  try {
-    if (fs.existsSync(dataFilePath)) {
-      const dataStr = fs.readFileSync(dataFilePath, 'utf8');
-      return JSON.parse(dataStr);
-    }
-  } catch (err) {
-    console.error('Error reading data file, using in-memory cache:', err);
-  }
-  return null;
-}
-
-// Helper to write data safely
-function writeDataStore(data: any) {
-  try {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (err) {
-    console.error('Error writing to data file:', err);
-    return false;
-  }
-}
-
 // Simple in-memory backup cache initially loaded from store
-let memoryCache = readDataStore();
+let memoryCache: any = null;
 
-// Secret token for state verification in current session
-const ADMIN_TOKEN = 'attri_session_token_' + (process.env.ADMIN_PASSWORD || 'AttriChem2026Admin!').split('').reverse().join('');
+async function initMemoryCache() {
+  memoryCache = await readDataStore();
+}
+
+initMemoryCache();
 
 // API Routes FIRST
 app.get('/api/health', (req, res) => {
@@ -108,8 +85,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // GET website content (with inquiries stripped for public safety)
-app.get('/api/content', (req, res) => {
-  const fileData = readDataStore();
+app.get('/api/content', async (req, res) => {
+  const fileData = await readDataStore();
   if (fileData) {
     memoryCache = fileData;
   }
@@ -140,13 +117,13 @@ app.get('/api/auth/session', (req, res) => {
 });
 
 // Public: Submit inquiry (Enroll / Contact details)
-app.post('/api/inquiries', (req, res) => {
+app.post('/api/inquiries', async (req, res) => {
   const { name, phone, email, course, message, type } = req.body;
   if (!name || !phone) {
     return res.status(400).json({ success: false, error: 'Name and Phone are required.' });
   }
 
-  const fileData = readDataStore() || memoryCache || {};
+  const fileData = (await readDataStore()) || memoryCache || {};
   const inquiries = fileData.inquiries || [];
 
   const newInquiry = {
@@ -164,31 +141,31 @@ app.post('/api/inquiries', (req, res) => {
   inquiries.unshift(newInquiry);
   fileData.inquiries = inquiries;
   memoryCache = fileData;
-  writeDataStore(fileData);
+  await writeDataStore(fileData);
 
   res.json({ success: true, message: 'Your booking has been registered successfully!' });
 });
 
 // Admin: Get all inquiries
-app.get('/api/inquiries', (req, res) => {
+app.get('/api/inquiries', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
-  const fileData = readDataStore() || memoryCache || {};
+  const fileData = (await readDataStore()) || memoryCache || {};
   res.json(fileData.inquiries || []);
 });
 
 // Admin: Mark an inquiry as read
-app.put('/api/inquiries/:id/read', (req, res) => {
+app.put('/api/inquiries/:id/read', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
   const { id } = req.params;
-  const fileData = readDataStore() || memoryCache || {};
+  const fileData = (await readDataStore()) || memoryCache || {};
   const inquiries = fileData.inquiries || [];
   
   const inquiry = inquiries.find((inq: any) => inq.id === id);
@@ -196,7 +173,7 @@ app.put('/api/inquiries/:id/read', (req, res) => {
     inquiry.read = !inquiry.read;
     fileData.inquiries = inquiries;
     memoryCache = fileData;
-    writeDataStore(fileData);
+    await writeDataStore(fileData);
     return res.json({ success: true, inquiries });
   }
 
@@ -204,26 +181,26 @@ app.put('/api/inquiries/:id/read', (req, res) => {
 });
 
 // Admin: Delete an inquiry
-app.delete('/api/inquiries/:id', (req, res) => {
+app.delete('/api/inquiries/:id', async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 
   const { id } = req.params;
-  const fileData = readDataStore() || memoryCache || {};
+  const fileData = (await readDataStore()) || memoryCache || {};
   const inquiries = fileData.inquiries || [];
   
   const filtered = inquiries.filter((inq: any) => inq.id !== id);
   fileData.inquiries = filtered;
   memoryCache = fileData;
-  writeDataStore(fileData);
+  await writeDataStore(fileData);
 
   res.json({ success: true, inquiries: filtered });
 });
 
 // PUT save/update website content (preserving inquiries array)
-app.put('/api/content', saveLimiter, (req, res) => {
+app.put('/api/content', saveLimiter, async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
@@ -234,11 +211,11 @@ app.put('/api/content', saveLimiter, (req, res) => {
     return res.status(400).json({ success: false, error: 'Empty body' });
   }
 
-  const fileData = readDataStore() || memoryCache || {};
+  const fileData = (await readDataStore()) || memoryCache || {};
   newData.inquiries = fileData.inquiries || [];
 
   memoryCache = newData;
-  const success = writeDataStore(newData);
+  const success = await writeDataStore(newData);
   
   res.json({ success, message: success ? 'Saved successfully' : 'Saved in-memory (persistent file error)' });
 });

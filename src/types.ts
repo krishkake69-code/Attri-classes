@@ -38,11 +38,13 @@ export interface QuizQuestion {
   explanation: string;
 }
 
-export interface FeatureCard {
+export interface BentoFeature {
   title: string;
   description: string;
-  iconName: string;
-  color: string;
+  stat: string;
+  statLabel: string;
+  variant: 'image' | 'accent' | 'pattern' | 'plain';
+  image?: string;
 }
 
 export interface ContactInfo {
@@ -72,4 +74,38 @@ export interface Inquiry {
   read: boolean;
 }
 
+export interface GalleryItem {
+  id: string;
+  category: 'Classroom' | 'Lab' | 'Events';
+  title: string;
+  desc: string;
+  imgUrl: string;
+  aspect?: 'square' | 'video' | 'photo';
+}
 
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface BatchSlot {
+  id: string;
+  batch: string;
+  audience: string;
+  days: string;
+  time: string;
+  seatsLeft: number;
+  seatsTotal: number;
+  mode: string;
+}
+
+export interface MethodStep {
+  title: string;
+  detail: string;
+}
+
+export interface ElementTile {
+  symbol: string;
+  number: number;
+  name: string;
+}
