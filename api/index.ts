@@ -1,0 +1,231 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import express from 'express';
+import path from 'path';
+import dotenv from 'dotenv';
+import { createServer as createViteServer } from 'vite';
+import { readDataStore, writeDataStore, ADMIN_TOKEN, ADMIN_PASSWORD } from '../server-utils.js';
+
+dotenv.config();
+
+const app = express();
+
+// Secure Express setup with enhanced body size limits for custom image uploads
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
+
+// Security headers and settings
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
+// Custom Zero-Dependency In-Memory Rate Limiter
+interface RateLimitRecord {
+  count: number;
+  resetTime: number;
+}
+const rateLimitCache = new Map<string, RateLimitRecord>();
+
+function createRateLimiter(maxRequests: number, windowMs: number, errorMessage: string) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'unknown-ip';
+    const key = `${req.path}:${ip}`;
+    const now = Date.now();
+
+    let record = rateLimitCache.get(key);
+    if (!record || now > record.resetTime) {
+      record = {
+        count: 0,
+        resetTime: now + windowMs
+      };
+    }
+
+    record.count++;
+    rateLimitCache.set(key, record);
+
+    if (record.count > maxRequests) {
+      const retryAfterSeconds = Math.ceil((record.resetTime - now) / 1000);
+      res.set('Retry-After', String(retryAfterSeconds));
+      return res.status(429).json({
+        success: false,
+        error: `${errorMessage} Please try again in ${retryAfterSeconds} seconds.`
+      });
+    }
+
+    next();
+  };
+}
+
+const loginLimiter = createRateLimiter(
+  5,
+  15 * 60 * 1000,
+  "Too many failed login attempts from this IP."
+);
+
+const saveLimiter = createRateLimiter(
+  15,
+  1 * 60 * 1000,
+  "Too many content saving requests. Please wait a minute."
+);
+
+// Simple in-memory backup cache initially loaded from store
+let memoryCache: any = null;
+
+async function initMemoryCache() {
+  memoryCache = await readDataStore();
+}
+
+initMemoryCache();
+
+// API Routes FIRST
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// GET website content (with inquiries stripped for public safety)
+app.get('/api/content', async (req, res) => {
+  const fileData = await readDataStore();
+  if (fileData) {
+    memoryCache = fileData;
+  }
+  const cleanCache = memoryCache ? { ...memoryCache } : {};
+  delete cleanCache.inquiries;
+  res.json(cleanCache);
+});
+
+// Admin login
+app.post('/api/auth/login', loginLimiter, (req, res) => {
+  const { password } = req.body;
+  const targetPassword = process.env.ADMIN_PASSWORD || 'AttriChem2026Admin!';
+  
+  if (password === targetPassword) {
+    return res.json({ success: true, token: ADMIN_TOKEN });
+  } else {
+    return res.status(401).json({ success: false, error: 'Incorrect password' });
+  }
+});
+
+// Validate admin session
+app.get('/api/auth/session', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader === `Bearer ${ADMIN_TOKEN}`) {
+    return res.json({ authenticated: true });
+  }
+  return res.status(401).json({ authenticated: false });
+});
+
+// Public: Submit inquiry (Enroll / Contact details)
+app.post('/api/inquiries', async (req, res) => {
+  const { name, phone, email, course, message, type } = req.body;
+  if (!name || !phone) {
+    return res.status(400).json({ success: false, error: 'Name and Phone are required.' });
+  }
+
+  const fileData = (await readDataStore()) || memoryCache || {};
+  const inquiries = fileData.inquiries || [];
+
+  const newInquiry = {
+    id: 'inq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    name,
+    phone,
+    email: email || '',
+    course: course || 'General Inquiry',
+    message: message || '',
+    type: type === 'enroll' ? 'enroll' : 'contact',
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+
+  inquiries.unshift(newInquiry);
+  fileData.inquiries = inquiries;
+  memoryCache = fileData;
+  await writeDataStore(fileData);
+
+  res.json({ success: true, message: 'Your booking has been registered successfully!' });
+});
+
+// Admin: Get all inquiries
+app.get('/api/inquiries', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  const fileData = (await readDataStore()) || memoryCache || {};
+  res.json(fileData.inquiries || []);
+});
+
+// Admin: Mark an inquiry as read
+app.put('/api/inquiries/:id/read', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  const { id } = req.params;
+  const fileData = (await readDataStore()) || memoryCache || {};
+  const inquiries = fileData.inquiries || [];
+  
+  const inquiry = inquiries.find((inq: any) => inq.id === id);
+  if (inquiry) {
+    inquiry.read = !inquiry.read;
+    fileData.inquiries = inquiries;
+    memoryCache = fileData;
+    await writeDataStore(fileData);
+    return res.json({ success: true, inquiries });
+  }
+
+  res.status(404).json({ success: false, error: 'Inquiry not found' });
+});
+
+// Admin: Delete an inquiry
+app.delete('/api/inquiries/:id', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  const { id } = req.params;
+  const fileData = (await readDataStore()) || memoryCache || {};
+  const inquiries = fileData.inquiries || [];
+  
+  const filtered = inquiries.filter((inq: any) => inq.id !== id);
+  fileData.inquiries = filtered;
+  memoryCache = fileData;
+  await writeDataStore(fileData);
+
+  res.json({ success: true, inquiries: filtered });
+});
+
+// PUT save/update website content (preserving inquiries array)
+app.put('/api/content', saveLimiter, async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader !== `Bearer ${ADMIN_TOKEN}`) {
+    return res.status(401).json({ success: false, error: 'Unauthorized' });
+  }
+
+  const newData = req.body;
+  if (!newData) {
+    return res.status(400).json({ success: false, error: 'Empty body' });
+  }
+
+  const fileData = (await readDataStore()) || memoryCache || {};
+  newData.inquiries = fileData.inquiries || [];
+
+  memoryCache = newData;
+  const success = await writeDataStore(newData);
+  
+  res.json({ success, message: success ? 'Saved successfully' : 'Saved in-memory (persistent file error)' });
+});
+
+// Handle all other routes (for SPA)
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// Vercel serverless function handler
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  return app(req, res);
+}

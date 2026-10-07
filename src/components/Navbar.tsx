@@ -1,6 +1,6 @@
-import React, { useState, useEffect, MouseEvent } from 'react';
-import { Menu, X, Sun, Moon, Beaker, GraduationCap, Lock } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { Menu, X, Sun, Moon, Lock, ArrowUpRight } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 
 interface NavbarProps {
   darkMode: boolean;
@@ -8,217 +8,227 @@ interface NavbarProps {
   onAdminClick?: () => void;
 }
 
+const NAV_ITEMS = [
+  { label: 'Home', href: '#home', id: 'home' },
+  { label: 'Method', href: '#method', id: 'method' },
+  { label: 'Courses', href: '#courses', id: 'courses' },
+  { label: 'Results', href: '#results', id: 'results' },
+  { label: 'Gallery', href: '#gallery', id: 'gallery' },
+  { label: 'Batches', href: '#batches', id: 'batches' },
+  { label: 'Contact', href: '#contact', id: 'contact' },
+];
+
 export default function Navbar({ darkMode, setDarkMode, onAdminClick }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const reduceMotion = useReducedMotion();
 
-  // Keep track of scroll depth
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+    const sections = NAV_ITEMS.map((item) => document.getElementById(item.id)).filter(
+      (el): el is HTMLElement => Boolean(el)
+    );
+    if (sections.length === 0) return;
 
-      // Check which section is in view
-      const sections = ['home', 'about', 'courses', 'why-us', 'results', 'testimonials', 'gallery', 'contact'];
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= 120 && rect.bottom >= 120) {
-            setActiveSection(section);
-            break;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
           }
-        }
-      }
-    };
+        });
+      },
+      { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
+    );
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
   }, []);
 
-  const navItems = [
-    { label: 'Home', href: '#home', id: 'home' },
-    { label: 'About Us', href: '#about', id: 'about' },
-    { label: 'Courses', href: '#courses', id: 'courses' },
-    { label: 'Results', href: '#results', id: 'results' },
-    { label: 'Testimonials', href: '#testimonials', id: 'testimonials' },
-    { label: 'Gallery', href: '#gallery', id: 'gallery' },
-    { label: 'Contact', href: '#contact', id: 'contact' },
-  ];
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
-  const handleNavClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
+  const handleNavClick = (href: string) => {
     setIsOpen(false);
     const target = document.querySelector(href);
     if (target) {
-      const offset = 80; // height of navbar approx
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const targetRect = target.getBoundingClientRect().top;
-      const targetPosition = targetRect - bodyRect;
-      const offsetPosition = targetPosition - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
     }
   };
 
   return (
-    <nav
-      id="main-navigation-header"
-      className={`fixed top-0 left-0 w-full z-40 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-md border-b border-blue-100/20 dark:border-slate-800/20 py-3'
-          : 'bg-transparent py-5'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo Brand */}
-          <a
-            href="#home"
-            onClick={(e) => handleNavClick(e, '#home')}
-            className="flex items-center gap-2 group cursor-pointer"
-            id="brand-logo-nav"
+    <nav className="px-3 pt-3 pb-1 sm:px-4" aria-label="Primary">
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 rounded-full border border-line bg-canvas/85 pr-2 pl-4 shadow-[0_10px_30px_-24px_rgba(27,24,21,0.5)] backdrop-blur-xl sm:pl-6">
+        <a
+          href="#home"
+          onClick={(e) => {
+            e.preventDefault();
+            handleNavClick('#home');
+          }}
+          className="flex shrink-0 items-center gap-2.5"
+          aria-label="Attri Chemistry Classes, back to top"
+        >
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-ink">
+            <span className="absolute inset-0 rounded-xl border border-on-accent/10" />
+            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+              <path
+                d="M12 2.8 20 7.5v9L12 21.2 4 16.5v-9z"
+                fill="none"
+                stroke="var(--accent)"
+                strokeWidth="1.6"
+              />
+              <circle cx="12" cy="12" r="2.6" fill="var(--accent)" />
+            </svg>
+          </span>
+          <span className="flex flex-col leading-none">
+            <span className="font-display text-[15px] font-semibold tracking-tight text-ink">
+              Attri Chemistry
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-ink-faint">
+              Classes
+            </span>
+          </span>
+        </a>
+
+        <div className="hidden items-center gap-0.5 lg:flex">
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={item.href}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick(item.href);
+              }}
+              className={`rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200 ${
+                activeSection === item.id
+                  ? 'bg-surface-muted text-ink'
+                  : 'text-ink-soft hover:bg-surface-muted/70 hover:text-ink'
+              }`}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink"
+            aria-label={darkMode ? 'Switch to light theme' : 'Switch to dark theme'}
           >
-            <div className="w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center text-white font-bold italic text-xl shadow-md transition-transform duration-200 group-hover:scale-105">
-              A
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg sm:text-xl font-black tracking-tight text-blue-900 dark:text-blue-100 leading-none">
-                ATTRI <span className="text-orange-600 dark:text-orange-500">CHEMISTRY</span>
-              </span>
-              <span className="text-[9px] font-bold tracking-[0.25em] text-slate-500 dark:text-slate-400 uppercase mt-0.5">
-                CLASSES
-              </span>
-            </div>
+            {darkMode ? (
+              <Sun className="h-4 w-4" strokeWidth={1.75} />
+            ) : (
+              <Moon className="h-4 w-4" strokeWidth={1.75} />
+            )}
+          </button>
+
+          {onAdminClick && (
+            <button
+              onClick={onAdminClick}
+              className="hidden h-10 w-10 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface-muted hover:text-ink sm:flex"
+              aria-label="Open admin panel"
+            >
+              <Lock className="h-4 w-4" strokeWidth={1.75} />
+            </button>
+          )}
+
+          <a
+            href="#contact"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick('#contact');
+            }}
+            className="group hidden items-center gap-2 rounded-full bg-accent py-1.5 pr-1.5 pl-5 text-[13px] font-semibold text-on-accent transition-all duration-300 hover:bg-accent-strong active:scale-[0.98] sm:inline-flex"
+          >
+            Book a free demo
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-on-accent/15 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-px">
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
+            </span>
           </a>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
-            <div className="flex items-center gap-1.5">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={`px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                    activeSection === item.id
-                      ? 'text-orange-500 bg-orange-50/50 dark:bg-orange-950/20'
-                      : 'text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-
-            {/* Icons and Controls */}
-            <div className="flex items-center gap-4 pl-4 border-l border-slate-200 dark:border-slate-700">
-              {/* Dark/Light mode toggle */}
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors shadow-sm cursor-pointer"
-                aria-label="Toggle theme mode"
-              >
-                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-              </button>
-
-              {/* Admin Access Panel Lock */}
-              {onAdminClick && (
-                <button
-                  onClick={onAdminClick}
-                  className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors shadow-sm cursor-pointer"
-                  title="Admin Control Center"
-                >
-                  <Lock className="w-4 h-4" />
-                </button>
-              )}
-
-              {/* Direct Admission CTA */}
-              <a
-                href="#contact"
-                onClick={(e) => handleNavClick(e, '#contact')}
-                className="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-full shadow-lg transition-all active:scale-95 text-center shrink-0"
-              >
-                Enroll Now
-              </a>
-            </div>
-          </div>
-
-          {/* Mobile Right Controls */}
-          <div className="flex lg:hidden items-center gap-2">
-            {/* Quick Dark Mode on Mobile */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
-              aria-label="Toggle theme mode"
-            >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            {onAdminClick && (
-              <button
-                onClick={onAdminClick}
-                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
-                title="Admin Control Center"
-              >
-                <Lock className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              aria-expanded={isOpen}
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface-muted lg:hidden"
+            aria-label="Open navigation menu"
+            aria-expanded={isOpen}
+          >
+            <Menu className="h-5 w-5" strokeWidth={1.75} />
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 overflow-hidden"
-            id="mobile-nav-panel"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.3 }}
+            className="fixed inset-0 z-50 flex flex-col bg-canvas/95 backdrop-blur-2xl lg:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
           >
-            <div className="px-4 pt-2 pb-6 space-y-1 sm:px-6">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
+            <div className="flex h-16 shrink-0 items-center justify-between px-4 pt-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-ink transition-colors hover:bg-surface-muted"
+                aria-label="Close navigation menu"
+              >
+                <X className="h-5 w-5" strokeWidth={1.75} />
+              </button>
+            </div>
+
+            <div className="flex flex-1 flex-col justify-center gap-1 px-6">
+              {NAV_ITEMS.map((item, index) => (
+                <motion.a
+                  key={item.id}
                   href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={`block px-3 py-3 rounded-xl text-base font-medium transition-colors ${
-                    activeSection === item.id
-                      ? 'text-orange-500 bg-orange-50 dark:bg-orange-950/20 font-bold'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.45,
+                    delay: reduceMotion ? 0 : 0.06 + index * 0.05,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(item.href);
+                  }}
+                  className="flex items-baseline justify-between border-b border-line py-4 font-display text-3xl font-medium tracking-tight text-ink"
                 >
                   {item.label}
-                </a>
+                  <span className="font-mono text-[11px] text-ink-faint">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                </motion.a>
               ))}
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-2">
-                <a
-                  href="#contact"
-                  onClick={(e) => handleNavClick(e, '#contact')}
-                  className="block w-full text-center bg-blue-600 dark:bg-orange-500 text-white font-bold px-4 py-3 rounded-xl shadow"
-                >
-                  Book Free Demo Lesson
-                </a>
-              </div>
             </div>
+
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: reduceMotion ? 0 : 0.4 }}
+              className="shrink-0 px-6 pb-10"
+            >
+              <a
+                href="#contact"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick('#contact');
+                }}
+                className="flex w-full items-center justify-center rounded-full bg-accent px-6 py-4 text-sm font-semibold text-on-accent"
+              >
+                Book a free demo
+              </a>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

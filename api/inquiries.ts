@@ -1,6 +1,30 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { kv } from '@vercel/kv';
 
+interface DataStore {
+  admissionMessage?: string;
+  stats?: any;
+  courses?: any[];
+  results?: any[];
+  testimonials?: any[];
+  gallery?: any[];
+  contactInfo?: any;
+  centers?: any[];
+  inquiries?: any[];
+}
+
+interface Inquiry {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  course?: string;
+  message?: string;
+  type: 'enroll' | 'contact';
+  timestamp: string;
+  read: boolean;
+}
+
 const DATA_KEY = 'attri:data-store';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'AttriChem2026Admin!';
 const ADMIN_TOKEN = 'attri_session_token_' + ADMIN_PASSWORD.split('').reverse().join('');
@@ -15,10 +39,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      const data = await kv.get(DATA_KEY) || {};
+      const data = (await kv.get<DataStore>(DATA_KEY)) || {};
       const inquiries = data.inquiries || [];
 
-      const newInquiry = {
+      const newInquiry: Inquiry = {
         id: 'inq_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         name,
         phone,
@@ -48,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      const data = await kv.get(DATA_KEY) || {};
+      const data = (await kv.get<DataStore>(DATA_KEY)) || {};
       return res.json(data.inquiries || []);
     } catch (err) {
       console.error('KV read error:', err);
@@ -63,9 +87,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      const data = await kv.get(DATA_KEY) || {};
+      const data = (await kv.get<DataStore>(DATA_KEY)) || {};
       const inquiries = data.inquiries || [];
-      const inquiry = inquiries.find((inq: any) => inq.id === id);
+      const inquiry = inquiries.find((inq: Inquiry) => inq.id === id);
       if (inquiry) {
         inquiry.read = !inquiry.read;
         data.inquiries = inquiries;
@@ -86,9 +110,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      const data = await kv.get(DATA_KEY) || {};
+      const data = (await kv.get<DataStore>(DATA_KEY)) || {};
       const inquiries = data.inquiries || [];
-      const filtered = inquiries.filter((inq: any) => inq.id !== id);
+      const filtered = inquiries.filter((inq: Inquiry) => inq.id !== id);
       data.inquiries = filtered;
       await kv.set(DATA_KEY, data);
 
