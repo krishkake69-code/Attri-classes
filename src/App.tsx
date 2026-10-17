@@ -18,15 +18,53 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import { AnimatePresence } from 'motion/react';
+import type { DynamicContent } from './types';
+import {
+  STATS,
+  HERO_CONTENT,
+  ABOUT_CONTENT,
+  DEFAULT_CONTACT_INFO,
+  DEFAULT_CENTERS,
+  COURSES,
+  RESULTS,
+  TESTIMONIALS,
+  BENTO_FEATURES,
+  METHOD_STEPS,
+  BATCH_SCHEDULE,
+  FAQS,
+  GALLERY_ITEMS,
+} from './data';
 
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
+
+/**
+ * Content used before the API responds, when it returns nothing, and as the
+ * initial seed in the admin panel. Mirrors src/data-store.json so the fallback
+ * never drifts from the served content.
+ */
+const FALLBACK_CONTENT: DynamicContent = {
+  admissionMessage: '⚡ ADMISSIONS OPEN FOR BATCH 2026-27 | REGISTER FOR FREE DEMO CLASSES NOW ⚡',
+  stats: STATS,
+  heroContent: HERO_CONTENT,
+  aboutContent: ABOUT_CONTENT,
+  methodology: METHOD_STEPS,
+  features: BENTO_FEATURES,
+  faqs: FAQS,
+  batches: BATCH_SCHEDULE,
+  courses: COURSES,
+  results: RESULTS,
+  testimonials: TESTIMONIALS,
+  gallery: GALLERY_ITEMS,
+  contactInfo: DEFAULT_CONTACT_INFO,
+  centers: DEFAULT_CENTERS,
+};
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(
     () => typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
   );
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [dynamicData, setDynamicData] = useState<any>(null);
+  const [dynamicData, setDynamicData] = useState<DynamicContent | null>(null);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -43,7 +81,7 @@ export default function App() {
       try {
         const res = await fetch('/api/content');
         if (res.ok) {
-          const data = await res.json();
+          const data = (await res.json()) as DynamicContent;
           if (data && data.admissionMessage) {
             setDynamicData(data);
           }
@@ -55,7 +93,7 @@ export default function App() {
     fetchContent();
   }, []);
 
-  const handleSaveContent = async (updatedData: any) => {
+  const handleSaveContent = async (updatedData: DynamicContent) => {
     try {
       const token = localStorage.getItem('attri_admin_token');
       if (!token) {
@@ -133,30 +171,7 @@ export default function App() {
             <AdminPanel
               isOpen={isAdminOpen}
               onClose={() => setIsAdminOpen(false)}
-              data={
-                dynamicData || {
-                  admissionMessage: '',
-                  stats: [],
-                  heroContent: { headline: '', subheadline: '' },
-                  aboutContent: { heading: '', paragraph1: '', paragraph2: '' },
-                  methodology: [],
-                  features: [],
-                  faqs: [],
-                  batches: [],
-                  courses: [],
-                  results: [],
-                  testimonials: [],
-                  gallery: [],
-                  contactInfo: {
-                    phone: '+91 98765 43210',
-                    email: 'admissions@attrichemistry.com',
-                    instagram: 'https://instagram.com/attri_chemistry',
-                    facebook: 'https://facebook.com/attri_chemistry',
-                    whatsapp: '+91 98765 43210',
-                  },
-                  centers: [],
-                }
-              }
+              data={dynamicData || FALLBACK_CONTENT}
               onSave={handleSaveContent}
             />
           </Suspense>

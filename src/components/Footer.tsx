@@ -1,16 +1,12 @@
 import { useState, FormEvent } from 'react';
-import { Mail, Send, Check, Facebook, Instagram, Youtube, Linkedin } from 'lucide-react';
+import { Mail, Send, Check, Facebook, Instagram } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { DEFAULT_CONTACT_INFO } from '../data';
+import type { ContactInfo } from '../types';
 
 interface FooterProps {
   onAdminClick?: () => void;
-  contactInfo?: {
-    phone: string;
-    email: string;
-    instagram: string;
-    facebook: string;
-    whatsapp: string;
-  };
+  contactInfo?: ContactInfo;
 }
 
 const QUICK_LINKS = [
@@ -25,15 +21,41 @@ const QUICK_LINKS = [
 
 export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
   const [newsEmail, setNewsEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const [subscribeState, setSubscribeState] = useState<'idle' | 'submitting' | 'done' | 'error'>(
+    'idle'
+  );
+  const [subscribeError, setSubscribeError] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
-  const handleSubscribe = (e: FormEvent) => {
+  const handleSubscribe = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newsEmail) return;
-    setSubscribed(true);
-    setNewsEmail('');
+    if (!newsEmail || subscribeState === 'submitting') return;
+
+    setSubscribeState('submitting');
+    setSubscribeError(null);
+
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsEmail }),
+      });
+      const result = await res.json().catch(() => ({}));
+
+      if (res.ok && result.success) {
+        setSubscribeState('done');
+        setNewsEmail('');
+      } else {
+        setSubscribeError(result.error || 'Could not subscribe right now. Please try again.');
+        setSubscribeState('error');
+      }
+    } catch {
+      setSubscribeError('Network error. Please try again in a moment.');
+      setSubscribeState('error');
+    }
   };
+
+  const subscribed = subscribeState === 'done';
 
   const handleNavClick = (href: string) => {
     const target = document.querySelector(href);
@@ -42,11 +64,10 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
     }
   };
 
+  const info = contactInfo || DEFAULT_CONTACT_INFO;
   const socials = [
-    { name: 'Facebook', href: contactInfo?.facebook || 'https://facebook.com/attri_chemistry', Icon: Facebook },
-    { name: 'Instagram', href: contactInfo?.instagram || 'https://instagram.com/attri_chemistry', Icon: Instagram },
-    { name: 'YouTube', href: 'https://youtube.com', Icon: Youtube },
-    { name: 'LinkedIn', href: 'https://linkedin.com', Icon: Linkedin },
+    { name: 'Facebook', href: info.facebook, Icon: Facebook },
+    { name: 'Instagram', href: info.instagram, Icon: Instagram },
   ];
 
   return (
@@ -131,18 +152,18 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
             <ul className="mt-5 space-y-3 text-sm text-ink-soft">
               <li>
                 <a
-                  href={`tel:${(contactInfo?.phone || '+919876543210').replace(/\s/g, '')}`}
+                  href={`tel:${info.phone.replace(/\s/g, '')}`}
                   className="transition-colors hover:text-accent"
                 >
-                  {contactInfo?.phone || '+91 98765 43210'}
+                  {info.phone}
                 </a>
               </li>
               <li>
                 <a
-                  href={`mailto:${contactInfo?.email || 'admissions@attrichemistry.com'}`}
+                  href={`mailto:${info.email}`}
                   className="transition-colors hover:text-accent"
                 >
-                  {contactInfo?.email || 'admissions@attrichemistry.com'}
+                  {info.email}
                 </a>
               </li>
               <li className="leading-relaxed">
@@ -175,6 +196,14 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
                   <label htmlFor="footer-email" className="sr-only">
                     Email address
                   </label>
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="pointer-events-none absolute h-0 w-0 opacity-0"
+                  />
                   <div className="flex items-center gap-2 rounded-full border border-line bg-surface p-1 pl-4">
                     <Mail className="h-4 w-4 shrink-0 text-ink-faint" strokeWidth={1.75} />
                     <input
@@ -188,12 +217,16 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
                     />
                     <button
                       type="submit"
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-canvas transition-transform active:scale-95"
+                      disabled={subscribeState === 'submitting'}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-canvas transition-transform active:scale-95 disabled:opacity-60"
                       aria-label="Subscribe to the practice bulletin"
                     >
                       <Send className="h-4 w-4" strokeWidth={1.75} />
                     </button>
                   </div>
+                  {subscribeState === 'error' && subscribeError && (
+                    <p className="mt-2 text-xs leading-relaxed text-accent">{subscribeError}</p>
+                  )}
                 </motion.form>
               ) : (
                 <motion.p
@@ -218,10 +251,10 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
             <span>
               Privacy policy available on request at{' '}
               <a
-                href={`mailto:${contactInfo?.email || 'admissions@attrichemistry.com'}`}
+                href={`mailto:${info.email}`}
                 className="underline decoration-line-strong underline-offset-4 transition-colors hover:text-accent"
               >
-                {contactInfo?.email || 'admissions@attrichemistry.com'}
+                {info.email}
               </a>
             </span>
             {onAdminClick && (

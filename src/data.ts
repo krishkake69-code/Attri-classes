@@ -9,7 +9,59 @@ import {
   BatchSlot,
   MethodStep,
   ElementTile,
+  StatItem,
+  HeroContent,
+  AboutContent,
+  ContactInfo,
+  CenterLocation,
 } from './types';
+
+/* ------------------------------------------------------------------ */
+/* Shared fallbacks                                                    */
+/*                                                                     */
+/* These are used when the backend content (data-store.json / KV) is   */
+/* unavailable, and as defaults before the first fetch resolves. Keep  */
+/* them aligned with src/data-store.json so the marketing copy is      */
+/* identical whether or not the API responds.                         */
+/* ------------------------------------------------------------------ */
+
+export const STATS: StatItem[] = [
+  { label: 'Students Mentored', value: '12K+', note: 'Across NEET & JEE' },
+  { label: 'Best Rank', value: 'AIR 42', note: 'In NEET UG' },
+  { label: 'Success Rate', value: '92%', note: 'Cleared Cutoff' },
+  { label: 'Top Percentile', value: '99.8', note: 'In JEE Mains' },
+];
+
+export const HERO_CONTENT: HeroContent = {
+  headline: 'Chemistry that makes sense.',
+  subheadline:
+    'Concept-first coaching for NEET, JEE and Boards. Small batches, weekly tests and a mentor who stays until it clicks.',
+};
+
+export const ABOUT_CONTENT: AboutContent = {
+  heading: 'The mentor behind the method',
+  paragraph1:
+    'Attri Sir has taught chemistry for eleven years, most of them to students who arrived convinced the subject was beyond them. Classes start on the board, not in the textbook: electron movement first, mechanism second, exceptions last.',
+  paragraph2:
+    'The institute opened in 2016 with one batch and a single rule. No student moves to the next chapter with an unanswered question from the last one. Every feature on this page exists to enforce that rule.',
+};
+
+export const DEFAULT_CONTACT_INFO: ContactInfo = {
+  phone: '+91 98765 43210',
+  email: 'admissions@attrichemistry.com',
+  instagram: 'https://instagram.com/attri_chemistry',
+  facebook: 'https://facebook.com/attri_chemistry',
+  whatsapp: '+91 98765 43210',
+};
+
+export const DEFAULT_CENTERS: CenterLocation[] = [
+  {
+    id: 'center-1',
+    name: 'Main Campus',
+    address: 'H-489 Govindpuram, Ghaziabad, Uttar Pradesh',
+    details: 'Near Spring Dales School',
+  },
+];
 
 export const COURSES: Course[] = [
   {

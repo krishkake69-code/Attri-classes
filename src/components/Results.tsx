@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { RESULTS } from '../data';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -6,6 +6,30 @@ import { ResultItem } from '../types';
 
 interface ResultsProps {
   results?: ResultItem[];
+}
+
+/** Student photo with a graceful initials fallback if the image fails. */
+function ResultPhoto({ result }: { result: ResultItem }) {
+  const [failed, setFailed] = useState(false);
+  const showImage = !!result.image && !failed;
+
+  return (
+    <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-surface-muted">
+      {showImage ? (
+        <img
+          src={result.image}
+          alt={result.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className="font-display text-base font-semibold text-ink">
+          {result.name.charAt(0).toUpperCase()}
+        </span>
+      )}
+    </span>
+  );
 }
 
 export default function Results({ results }: ResultsProps) {
@@ -70,9 +94,12 @@ export default function Results({ results }: ResultsProps) {
                 index === 0 ? 'border-accent bg-accent-soft' : 'border-line bg-surface'
               }`}
             >
-              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
-                {result.exam} / {result.year}
-              </p>
+              <div className="flex items-center gap-3">
+                <ResultPhoto result={result} />
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint">
+                  {result.exam} / {result.year}
+                </p>
+              </div>
               <p
                 className={`mt-5 font-mono text-4xl font-medium tracking-tight ${
                   index === 0 ? 'text-accent' : 'text-ink'

@@ -1,15 +1,25 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion, type MotionProps } from 'motion/react';
 import ChemistryParticles from './ChemistryParticles';
+import { HERO_CONTENT } from '../data';
+import type { HeroContent } from '../types';
 
 const HERO_IMAGE =
   'https://images.unsplash.com/photo-1554475901-4538ddfbccc2?auto=format&fit=crop&q=80&w=1200&h=1500';
 
 interface HeroProps {
-  content?: { headline: string; subheadline: string };
+  content?: HeroContent;
 }
 export default function Hero({ content }: HeroProps) {
   const reduceMotion = useReducedMotion();
+
+  const headline = content?.headline?.trim() || HERO_CONTENT.headline;
+  const subheadline = content?.subheadline?.trim() || HERO_CONTENT.subheadline;
+
+  // Emphasise the final two words of the headline in the accent colour.
+  const words = headline.split(' ');
+  const lead = words.slice(0, -2).join(' ');
+  const accent = words.slice(-2).join(' ');
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -53,20 +63,18 @@ export default function Hero({ content }: HeroProps) {
           <div className="lg:col-span-6">
             <motion.h1
               {...enter(0)}
-              className="font-display text-[clamp(2.5rem,5.5vw,4.4rem)] leading-[1.02] font-semibold tracking-[-0.03em] text-ink"
+              className="font-display text-[clamp(2.5rem,5.5vw,4.4rem)] leading-[1.02] font-semibold tracking-[-0.03em] text-balance text-ink"
               id="hero-main-title"
             >
-              Chemistry that
-              <br />
-              finally <span className="text-accent">makes sense.</span>
+              {lead && <>{lead} </>}
+              <span className="text-accent">{accent}</span>
             </motion.h1>
 
             <motion.p
               {...enter(0.12)}
               className="mt-6 max-w-[46ch] text-base leading-relaxed text-ink-soft sm:text-lg"
             >
-              Concept-first coaching for NEET, JEE and Boards. Small batches, weekly tests and a
-              mentor who stays until it clicks.
+              {subheadline}
             </motion.p>
 
             <motion.div

@@ -7,6 +7,23 @@ interface TestimonialsProps {
   testimonials?: Testimonial[];
 }
 
+/**
+ * Deterministic accent tint derived from the testimonial's avatarSeed, so
+ * the editable seed visibly controls the avatar colour.
+ */
+const AVATAR_TINTS = [
+  'bg-ink text-canvas',
+  'bg-accent text-on-accent',
+  'bg-accent-soft text-accent',
+  'bg-surface-muted text-ink',
+];
+
+function avatarTint(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % 997;
+  return AVATAR_TINTS[hash % AVATAR_TINTS.length];
+}
+
 export default function Testimonials({ testimonials }: TestimonialsProps) {
   const reduceMotion = useReducedMotion();
   const testimonialsToDisplay = testimonials ?? TESTIMONIALS;
@@ -51,8 +68,12 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
               </blockquote>
 
               <figcaption className="mt-7 flex items-center gap-4 border-t border-line pt-6">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink font-display text-base font-semibold text-canvas">
-                  {testimonial.name.charAt(0)}
+                <span
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl font-display text-base font-semibold ${avatarTint(
+                    testimonial.avatarSeed || testimonial.name
+                  )}`}
+                >
+                  {(testimonial.avatarSeed || testimonial.name).charAt(0).toUpperCase()}
                 </span>
                 <span>
                   <span className="block text-sm font-semibold text-ink">{testimonial.name}</span>

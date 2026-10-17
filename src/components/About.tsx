@@ -1,5 +1,7 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
+import { ABOUT_CONTENT } from '../data';
+import type { AboutContent } from '../types';
 
 const MENTOR_IMAGE =
   'https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&q=80&w=1200&h=900';
@@ -12,10 +14,14 @@ const CREDENTIALS = [
 ];
 
 interface AboutProps {
-  content?: { heading: string; paragraph1: string; paragraph2: string };
+  content?: AboutContent;
 }
 export default function About({ content }: AboutProps) {
   const reduceMotion = useReducedMotion();
+
+  const heading = content?.heading?.trim() || ABOUT_CONTENT.heading;
+  const paragraph1 = content?.paragraph1?.trim() || ABOUT_CONTENT.paragraph1;
+  const paragraph2 = content?.paragraph2?.trim() || ABOUT_CONTENT.paragraph2;
 
   return (
     <section id="about" className="border-b border-line bg-surface">
@@ -51,19 +57,11 @@ export default function About({ content }: AboutProps) {
 
           <div className="lg:col-span-7">
             <h2 className="font-display text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl lg:text-5xl">
-              The mentor behind the method
+              {heading}
             </h2>
             <div className="mt-6 space-y-5 text-base leading-relaxed text-ink-soft">
-              <p className="max-w-[65ch]">
-                Attri Sir has taught chemistry for eleven years, most of them to students who
-                arrived convinced the subject was beyond them. Classes start on the board, not in
-                the textbook: electron movement first, mechanism second, exceptions last.
-              </p>
-              <p className="max-w-[65ch]">
-                The institute opened in 2016 with one batch and a single rule. No student moves to
-                the next chapter with an unanswered question from the last one. Every feature on
-                this page exists to enforce that rule.
-              </p>
+              <p className="max-w-[65ch]">{paragraph1}</p>
+              <p className="max-w-[65ch]">{paragraph2}</p>
             </div>
 
             <ul className="mt-9 grid gap-x-8 gap-y-4 sm:grid-cols-2">

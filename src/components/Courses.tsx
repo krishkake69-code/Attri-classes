@@ -11,6 +11,20 @@ interface CoursesProps {
 const FILTERS = ['All', 'NEET', 'JEE', 'Boards', 'Foundation'] as const;
 type Filter = (typeof FILTERS)[number];
 
+/**
+ * Maps a course's accentColor (editable in the admin panel) to concrete
+ * Tailwind classes. Kept as a static map so the classes are never purged.
+ */
+const ACCENT_COLORS: Record<string, { dot: string; text: string; border: string }> = {
+  rose: { dot: 'bg-rose-500', text: 'text-rose-600', border: 'hover:border-rose-300' },
+  blue: { dot: 'bg-blue-500', text: 'text-blue-600', border: 'hover:border-blue-300' },
+  indigo: { dot: 'bg-indigo-500', text: 'text-indigo-600', border: 'hover:border-indigo-300' },
+  emerald: { dot: 'bg-emerald-500', text: 'text-emerald-600', border: 'hover:border-emerald-300' },
+  orange: { dot: 'bg-orange-500', text: 'text-orange-600', border: 'hover:border-orange-300' },
+  amber: { dot: 'bg-amber-500', text: 'text-amber-600', border: 'hover:border-amber-300' },
+};
+const FALLBACK_ACCENT = { dot: 'bg-accent', text: 'text-accent', border: 'hover:border-line-strong' };
+
 export default function Courses({ courses }: CoursesProps) {
   const [activeTab, setActiveTab] = useState<Filter>('All');
   const [selectedCourseForEnroll, setSelectedCourseForEnroll] = useState<Course | null>(null);
@@ -22,6 +36,7 @@ export default function Courses({ courses }: CoursesProps) {
     phone: '',
     grade: 'Class 12th',
     mode: 'Offline Classes',
+    website: '',
   });
   const reduceMotion = useReducedMotion();
 
@@ -67,6 +82,7 @@ export default function Courses({ courses }: CoursesProps) {
           course: selectedCourseForEnroll.name,
           message: `Class preference: ${formData.grade} | Mode of class: ${formData.mode}`,
           type: 'enroll',
+          website: formData.website,
         }),
       });
 
@@ -86,7 +102,7 @@ export default function Courses({ courses }: CoursesProps) {
 
   const handleCloseModal = () => {
     setSelectedCourseForEnroll(null);
-    setFormData({ name: '', phone: '', grade: 'Class 12th', mode: 'Offline Classes' });
+    setFormData({ name: '', phone: '', grade: 'Class 12th', mode: 'Offline Classes', website: '' });
     setSubmitError(null);
   };
 
@@ -127,6 +143,7 @@ export default function Courses({ courses }: CoursesProps) {
           <AnimatePresence mode="popLayout">
             {filteredCourses.map((course, index) => {
               const featured = index === 0;
+              const accent = ACCENT_COLORS[course.accentColor] ?? FALLBACK_ACCENT;
 
               return (
                 <motion.article
@@ -139,17 +156,21 @@ export default function Courses({ courses }: CoursesProps) {
                   className={`flex flex-col rounded-[1.5rem] border p-7 transition-colors duration-300 sm:p-9 ${
                     featured
                       ? 'border-[#1b1815] bg-[#1b1815] text-[#faf8f5]'
-                      : 'border-line bg-surface hover:border-line-strong'
+                      : `border-line bg-surface ${accent.border}`
                   }`}
                 >
                   <div className="flex items-center justify-between gap-4">
                     <span
-                      className={`rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] ${
                         featured
                           ? 'border-[#faf8f5]/25 text-[#faf8f5]/80'
                           : 'border-line text-ink-soft'
                       }`}
                     >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${accent.dot}`}
+                        aria-hidden="true"
+                      />
                       {course.tag}
                     </span>
                     <span
@@ -287,6 +308,16 @@ export default function Courses({ courses }: CoursesProps) {
                 <div className="p-6 sm:p-8">
                   {!enrollFormSubmitted ? (
                     <form onSubmit={handleEnrollSubmit} className="space-y-5">
+                      <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        value={formData.website}
+                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                        className="pointer-events-none absolute h-0 w-0 opacity-0"
+                      />
                       <div className="space-y-2">
                         <label
                           htmlFor="enroll-name"

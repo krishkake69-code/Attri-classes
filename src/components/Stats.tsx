@@ -1,18 +1,15 @@
 import { motion, useReducedMotion } from 'motion/react';
+import { STATS } from '../data';
+import type { StatItem } from '../types';
 
 interface StatsProps {
-  stats?: { label: string; value: string; note: string }[];
+  stats?: StatItem[];
 }
 
 export default function Stats({ stats }: StatsProps) {
   const reduceMotion = useReducedMotion();
 
-  const statsList = stats && stats.length > 0 ? stats : [
-    { label: 'Students mentored', value: '1,240', note: 'across all batches since 2016' },
-    { label: 'Cleared their target exam', value: '94.6%', note: 'board and entrance students combined' },
-    { label: 'Years teaching chemistry', value: '11 yrs', note: 'sole faculty for every batch' },
-    { label: 'Selections in NEET and JEE', value: '268', note: 'IITs, NITs and government medical colleges' }
-  ];
+  const statsList = stats && stats.length > 0 ? stats : STATS;
 
   return (
     <section className="border-b border-line bg-surface" id="stats">

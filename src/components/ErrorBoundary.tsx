@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { TriangleAlert } from 'lucide-react';
+import { DEFAULT_CONTACT_INFO } from '../data';
 
 interface Props {
   children: React.ReactNode;
@@ -37,8 +38,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
               This section failed to load
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-              Refresh the page to try again. If the problem continues, call the admissions desk at
-              +91 98765 43210.
+              Refresh the page to try again. If the problem continues, call the admissions desk at{' '}
+              {DEFAULT_CONTACT_INFO.phone}.
             </p>
             <button
               onClick={() => window.location.reload()}

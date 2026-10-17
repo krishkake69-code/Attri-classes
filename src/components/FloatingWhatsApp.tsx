@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Send, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { DEFAULT_CONTACT_INFO } from '../data';
 
 interface FloatingWhatsAppProps {
   phone?: string;
@@ -25,7 +26,7 @@ export default function FloatingWhatsApp({ phone }: FloatingWhatsAppProps) {
   const [isOpen, setIsOpen] = useState(false);
   const reduceMotion = useReducedMotion();
 
-  const cleanPhone = phone ? phone.replace(/[^0-9]/g, '') : '919876543210';
+  const cleanPhone = (phone || DEFAULT_CONTACT_INFO.whatsapp).replace(/[^0-9]/g, '');
 
   const handleWhatsAppRedirect = (customMsg?: string) => {
     const baseMsg =

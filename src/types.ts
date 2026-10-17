@@ -110,15 +110,39 @@ export interface ElementTile {
   name: string;
 }
 
-export interface SiteContent {
-  heroHeadline: string;
-  heroSubheadline: string;
-  aboutHeading: string;
-  aboutParagraph1: string;
-  aboutParagraph2: string;
-  stats: { label: string; value: string; note: string }[];
-  methodology: { title: string; detail: string }[];
-  features: { title: string; description: string; stat: string; statLabel: string; variant: 'image' | 'accent' | 'pattern' | 'plain'; image?: string }[];
-  faqs: { question: string; answer: string }[];
-  batches: { id: string; batch: string; audience: string; days: string; time: string; seatsLeft: number; seatsTotal: number; mode: string }[];
+export interface StatItem {
+  label: string;
+  value: string;
+  note: string;
+}
+
+export interface HeroContent {
+  headline: string;
+  subheadline: string;
+}
+
+export interface AboutContent {
+  heading: string;
+  paragraph1: string;
+  paragraph2: string;
+}
+
+/** Shape served by GET /api/content (see api-app.ts). */
+export interface DynamicContent {
+  admissionMessage?: string;
+  stats?: StatItem[];
+  heroContent?: HeroContent;
+  aboutContent?: AboutContent;
+  methodology?: MethodStep[];
+  features?: BentoFeature[];
+  faqs?: FaqItem[];
+  batches?: BatchSlot[];
+  courses?: Course[];
+  results?: ResultItem[];
+  testimonials?: Testimonial[];
+  gallery?: GalleryItem[];
+  contactInfo?: ContactInfo;
+  centers?: CenterLocation[];
+  inquiries?: Inquiry[];
+  newsletter?: string[];
 }

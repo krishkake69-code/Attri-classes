@@ -1,31 +1,13 @@
 import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Phone, Mail, MapPin, Check, Send, MessageCircle } from 'lucide-react';
+import { DEFAULT_CONTACT_INFO, DEFAULT_CENTERS } from '../data';
+import type { ContactInfo, CenterLocation } from '../types';
 
 interface ContactProps {
-  contactInfo?: {
-    phone: string;
-    email: string;
-    instagram: string;
-    facebook: string;
-    whatsapp: string;
-  };
-  centers?: {
-    id: string;
-    name: string;
-    address: string;
-    details: string;
-  }[];
+  contactInfo?: ContactInfo;
+  centers?: CenterLocation[];
 }
-
-const DEFAULT_CENTERS = [
-  {
-    id: 'center-1',
-    name: 'Main Campus',
-    address: 'H-489 Govindpuram, Ghaziabad, Uttar Pradesh',
-    details: 'Near Spring Dales School',
-  },
-];
 
 export default function Contact({ contactInfo, centers }: ContactProps) {
   const [formData, setFormData] = useState({
@@ -34,6 +16,7 @@ export default function Contact({ contactInfo, centers }: ContactProps) {
     phone: '',
     course: 'NEET Chemistry',
     message: '',
+    website: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -41,9 +24,10 @@ export default function Contact({ contactInfo, centers }: ContactProps) {
   const [selectedCenterIdx, setSelectedCenterIdx] = useState(0);
   const reduceMotion = useReducedMotion();
 
-  const cleanPhone = contactInfo?.phone ? contactInfo.phone.replace(/[^0-9]/g, '') : '919876543210';
-  const displayPhone = contactInfo?.phone || '+91 98765 43210';
-  const displayEmail = contactInfo?.email || 'admissions@attrichemistry.com';
+  const info = contactInfo || DEFAULT_CONTACT_INFO;
+  const cleanPhone = info.phone.replace(/[^0-9]/g, '');
+  const displayPhone = info.phone;
+  const displayEmail = info.email;
 
   const centersToDisplay = centers && centers.length > 0 ? centers : DEFAULT_CENTERS;
   const activeCenter = centersToDisplay[selectedCenterIdx] || centersToDisplay[0];
@@ -72,12 +56,13 @@ export default function Contact({ contactInfo, centers }: ContactProps) {
           course: formData.course,
           message: formData.message,
           type: 'contact',
+          website: formData.website,
         }),
       });
 
       if (res.ok) {
         setSubmitted(true);
-        setFormData({ name: '', email: '', phone: '', course: 'NEET Chemistry', message: '' });
+        setFormData({ name: '', email: '', phone: '', course: 'NEET Chemistry', message: '', website: '' });
       } else {
         const errData = await res.json();
         setSubmitError(errData.error || 'Could not submit the form. Please try again.');
@@ -201,6 +186,16 @@ export default function Contact({ contactInfo, centers }: ContactProps) {
                     exit={{ opacity: 0 }}
                     className="space-y-5"
                   >
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      value={formData.website}
+                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                      className="pointer-events-none absolute h-0 w-0 opacity-0"
+                    />
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label
