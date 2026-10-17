@@ -76,15 +76,37 @@ export default function App() {
     }
   }, [darkMode]);
 
+  function normalizeStats(stats: unknown): any[] {
+    if (Array.isArray(stats)) return stats;
+    if (stats && typeof stats === 'object') {
+      const s = stats as Record<string, any>;
+      const mapped: Array<{ label: string; value: string; note: string }> = [];
+      if (s.studentsCount !== undefined && s.studentsCount !== null) {
+        mapped.push({ label: 'Students Mentored', value: String(s.studentsCount), note: 'Across NEET & JEE' });
+      }
+      if (s.successRate !== undefined && s.successRate !== null) {
+        mapped.push({ label: 'Success Rate', value: String(s.successRate), note: 'Cleared Cutoff' });
+      }
+      if (s.experience !== undefined && s.experience !== null) {
+        mapped.push({ label: 'Years of Experience', value: String(s.experience), note: 'Expert curriculum-focused mentorship' });
+      }
+      return mapped;
+    }
+    return [];
+  }
+
   useEffect(() => {
     const fetchContent = async () => {
       try {
         const res = await fetch('/api/content');
         if (res.ok) {
           const data = (await res.json()) as DynamicContent;
-          if (data && data.admissionMessage) {
-            setDynamicData(data);
-          }
+          const merged = {
+            ...FALLBACK_CONTENT,
+            ...data,
+            stats: normalizeStats((data as any)?.stats),
+          };
+          setDynamicData(merged);
         }
       } catch (err) {
         console.error('Failed to load dynamic data from backend:', err);
@@ -140,20 +162,20 @@ export default function App() {
       </header>
 
       <main id="main-content" className="overflow-x-hidden">
-        <Hero content={dynamicData?.heroContent} />
+        <Hero content={dynamicData?.heroContent || FALLBACK_CONTENT.heroContent} />
         <ElementTicker />
-        <Stats stats={dynamicData?.stats} />
-        <Method methodology={dynamicData?.methodology} />
-        <About content={dynamicData?.aboutContent} />
-        <Courses courses={dynamicData?.courses} />
-        <WhyChooseUs features={dynamicData?.features} />
-        <Results results={dynamicData?.results} />
+        <Stats stats={Array.isArray(dynamicData?.stats) ? dynamicData.stats : FALLBACK_CONTENT.stats} />
+        <Method methodology={dynamicData?.methodology || FALLBACK_CONTENT.methodology} />
+        <About content={dynamicData?.aboutContent || FALLBACK_CONTENT.aboutContent} />
+        <Courses courses={dynamicData?.courses || FALLBACK_CONTENT.courses} />
+        <WhyChooseUs features={dynamicData?.features || FALLBACK_CONTENT.features} />
+        <Results results={dynamicData?.results || FALLBACK_CONTENT.results} />
         <InteractiveChemistryQuiz />
-        <Testimonials testimonials={dynamicData?.testimonials} />
-        <Gallery items={dynamicData?.gallery} />
-        <BatchSchedule batches={dynamicData?.batches} />
-        <FAQ faqs={dynamicData?.faqs} />
-        <Contact contactInfo={dynamicData?.contactInfo} centers={dynamicData?.centers} />
+        <Testimonials testimonials={dynamicData?.testimonials || FALLBACK_CONTENT.testimonials} />
+        <Gallery items={dynamicData?.gallery || FALLBACK_CONTENT.gallery} />
+        <BatchSchedule batches={dynamicData?.batches || FALLBACK_CONTENT.batches} />
+        <FAQ faqs={dynamicData?.faqs || FALLBACK_CONTENT.faqs} />
+        <Contact contactInfo={dynamicData?.contactInfo || FALLBACK_CONTENT.contactInfo} centers={dynamicData?.centers || FALLBACK_CONTENT.centers} />
       </main>
 
       <Footer

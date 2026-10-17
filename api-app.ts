@@ -97,11 +97,33 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
   return res.status(401).json({ success: false, error: 'Unauthorized' });
 }
 
-/** Strips every non-public key (inquiries, newsletter subscribers). */
+/** Strips every non-public key (inquiries, newsletter subscribers) and normalizes legacy shapes. */
 function publicView(data: any) {
   const clean = { ...(data || {}) };
   delete clean.inquiries;
   delete clean.newsletter;
+
+  // Normalize stats: legacy object {studentsCount, successRate, experience}
+  if (clean.stats && typeof clean.stats === 'object' && !Array.isArray(clean.stats)) {
+    const s = clean.stats as Record<string, any>;
+    const mapped: Array<{ label: string; value: string; note: string }> = [];
+    if (s.studentsCount !== undefined && s.studentsCount !== null) {
+      mapped.push({ label: 'Students Mentored', value: String(s.studentsCount), note: 'Across NEET & JEE' });
+    }
+    if (s.successRate !== undefined && s.successRate !== null) {
+      mapped.push({ label: 'Success Rate', value: String(s.successRate), note: 'Cleared Cutoff' });
+    }
+    if (s.experience !== undefined && s.experience !== null) {
+      mapped.push({ label: 'Years of Experience', value: String(s.experience), note: 'Expert curriculum-focused mentorship' });
+    }
+    if (mapped.length === 0) {
+      mapped.push({ label: 'Students Mentored', value: '1000+', note: 'Across NEET & JEE' });
+    }
+    clean.stats = mapped;
+  } else if (!Array.isArray(clean.stats)) {
+    clean.stats = [];
+  }
+
   return clean;
 }
 

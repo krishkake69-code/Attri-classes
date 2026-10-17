@@ -248,22 +248,24 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
 
   const updateStatField = (index: number, field: keyof StatItem, value: string) => {
     if (!localData) return;
-    const stats = localData.stats ?? [];
+    const stats = Array.isArray(localData.stats) ? localData.stats : [];
     const nextStats = [...stats];
-    nextStats[index] = { ...nextStats[index], [field]: value };
-    setLocalData({ ...localData, stats: nextStats });
+    if (index >= 0 && index < nextStats.length) {
+      nextStats[index] = { ...nextStats[index], [field]: value };
+      setLocalData({ ...localData, stats: nextStats });
+    }
   };
 
   const addStat = () => {
     if (!localData) return;
-    const stats = localData.stats ?? [];
+    const stats = Array.isArray(localData.stats) ? localData.stats : [];
     const newStat: StatItem = { label: 'New Stat', value: '0', note: 'Add supporting detail' };
     setLocalData({ ...localData, stats: [...stats, newStat] });
   };
 
   const deleteStat = (index: number) => {
     if (!localData) return;
-    const stats = localData.stats ?? [];
+    const stats = Array.isArray(localData.stats) ? localData.stats : [];
     setLocalData({ ...localData, stats: stats.filter((_, idx) => idx !== index) });
   };
 
@@ -759,10 +761,10 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
                           </div>
 
                           <div className="space-y-4">
-                            {(localData.stats ?? []).length === 0 ? (
+                            {(Array.isArray(localData.stats) ? localData.stats : []).length === 0 ? (
                               <p className="text-xs text-ink-faint italic">No statistics defined. Click 'Add stat' to add counters.</p>
                             ) : (
-                              (localData.stats ?? []).map((stat, index) => (
+                              (Array.isArray(localData.stats) ? localData.stats : []).map((stat, index) => (
                                 <div key={index} className="p-4 bg-surface-muted rounded-xl border border-line relative space-y-3">
                                   <button
                                     type="button"
