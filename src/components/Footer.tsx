@@ -257,6 +257,12 @@ export default function Footer({ onAdminClick, contactInfo }: FooterProps) {
                 {info.email}
               </a>
             </span>
+            <a
+              href="/student/login"
+              className="font-mono text-[10px] uppercase tracking-[0.18em] transition-colors hover:text-accent"
+            >
+              Student login
+            </a>
             {onAdminClick && (
               <button
                 onClick={onAdminClick}

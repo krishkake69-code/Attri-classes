@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Menu, X, Sun, Moon, Lock, ArrowUpRight } from 'lucide-react';
+import { Menu, X, Sun, Moon, Lock, ArrowUpRight, GraduationCap } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 
 interface NavbarProps {
@@ -126,6 +126,15 @@ export default function Navbar({ darkMode, setDarkMode, onAdminClick }: NavbarPr
             )}
           </button>
 
+          <a
+            href="/student/login"
+            className="hidden h-10 items-center gap-2 rounded-full border border-line px-4 text-[13px] font-semibold text-ink-soft transition-colors hover:border-accent hover:text-accent sm:flex"
+            aria-label="Student login"
+          >
+            <GraduationCap className="h-4 w-4" strokeWidth={1.75} />
+            <span className="hidden md:inline">Student Login</span>
+          </a>
+
           {onAdminClick && (
             <button
               onClick={onAdminClick}
@@ -227,6 +236,13 @@ export default function Navbar({ darkMode, setDarkMode, onAdminClick }: NavbarPr
                 className="flex w-full items-center justify-center rounded-full bg-accent px-6 py-4 text-sm font-semibold text-on-accent"
               >
                 Book a free demo
+              </a>
+              <a
+                href="/student/login"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-line px-6 py-4 text-sm font-semibold text-ink"
+              >
+                <GraduationCap className="h-4 w-4" strokeWidth={1.75} />
+                Student Login
               </a>
             </motion.div>
           </motion.div>

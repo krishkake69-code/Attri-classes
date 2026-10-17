@@ -145,4 +145,87 @@ export interface DynamicContent {
   centers?: CenterLocation[];
   inquiries?: Inquiry[];
   newsletter?: string[];
+  students?: Student[];
+  attendance?: AttendanceRecord[];
+  marks?: MarkRecord[];
+  calendar?: CalendarEvent[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Student portal: batches, students, attendance, marks, calendar      */
+/* ------------------------------------------------------------------ */
+
+export type BatchId = 'MON_TUE_WED_11' | 'MON_TUE_WED_12' | 'FRI_SAT_SUN_11' | 'FRI_SAT_SUN_12';
+
+export interface BatchInfo {
+  id: BatchId;
+  name: string;
+  days: string;
+  class: '11th' | '12th';
+  studentsCount: number;
+  description: string;
+}
+
+export interface Student {
+  id: string;
+  username: string;
+  name: string;
+  class: '11th' | '12th';
+  batchId: BatchId;
+  phone?: string;
+  email?: string;
+  subjects?: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/** Server-side only (never sent to clients). */
+export interface StudentRecord extends Student {
+  passwordHash: string;
+}
+
+export type AttendanceStatus = 'present' | 'absent' | 'late';
+
+export interface AttendanceRecord {
+  id: string;
+  studentId: string;
+  batchId: string;
+  date: string; // YYYY-MM-DD
+  status: AttendanceStatus;
+  markedBy: 'admin';
+  markedAt: string;
+}
+
+export interface MarkRecord {
+  id: string;
+  studentId: string;
+  batchId: string;
+  testName: string;
+  subject: string;
+  maxMarks: number;
+  marksObtained: number;
+  date: string; // YYYY-MM-DD
+  remarks?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string; // YYYY-MM-DD
+  endDate?: string;
+  batchId?: string;
+  class?: '11th' | '12th' | 'all';
+  createdAt: string;
+  updatedAt?: string;
+}
+
+/** GET /api/student/me response payload. */
+export interface StudentMe {
+  student: Student;
+  attendance: AttendanceRecord[];
+  marks: MarkRecord[];
+  calendar: CalendarEvent[];
 }

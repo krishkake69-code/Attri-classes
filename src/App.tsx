@@ -57,6 +57,10 @@ const FALLBACK_CONTENT: DynamicContent = {
   gallery: GALLERY_ITEMS,
   contactInfo: DEFAULT_CONTACT_INFO,
   centers: DEFAULT_CENTERS,
+  students: [],
+  attendance: [],
+  marks: [],
+  calendar: [],
 };
 
 export default function App() {

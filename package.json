@@ -21,12 +21,15 @@
     "@vercel/kv": "^3.0.0",
     "@vercel/node": "^4.0.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "helmet": "^8.3.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "react-router-dom": "^7.18.4",
     "vite": "^6.2.3"
   },
   "devDependencies": {

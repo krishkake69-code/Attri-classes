@@ -3,8 +3,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Lock, LogOut, Save, ShieldCheck, Check, AlertCircle, X, Plus, Trash2, 
   Settings, Megaphone, BarChart3, GraduationCap, Trophy, MessageSquare, Image, ArrowRight, MapPin,
-  Mail, Inbox, RefreshCw, CheckCircle2, Phone, Calendar, MessageCircle } from 'lucide-react';
+  Mail, Inbox, RefreshCw, CheckCircle2, Phone, Calendar, MessageCircle,
+  Users, CalendarCheck2, BookOpenCheck, CalendarPlus } from 'lucide-react';
 import { Course, ResultItem, Testimonial, GalleryItem, StatItem, DynamicContent } from '../types';
+import AdminStudents from './admin/AdminStudents';
+import AdminAttendance from './admin/AdminAttendance';
+import AdminMarks from './admin/AdminMarks';
+import AdminCalendar from './admin/AdminCalendar';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -35,7 +40,7 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
   
   // Local editable copies of data
   const [localData, setLocalData] = useState<DynamicContent | null>(null);
-  const [activeTab, setActiveTab] = useState<'general' | 'courses' | 'results' | 'testimonials' | 'gallery' | 'mailbox' | 'siteContent' | 'batches' | 'faqs'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'courses' | 'results' | 'testimonials' | 'gallery' | 'mailbox' | 'siteContent' | 'batches' | 'faqs' | 'students' | 'attendance' | 'marks' | 'calendar'>('general');
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -672,6 +677,58 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
                       {inquiries.filter((inq: any) => !inq.read).length} NEW
                     </span>
                   )}
+                </button>
+
+                <div className="hidden md:block pt-2">
+                  <p className="px-4 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-ink-faint">Student Portal</p>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('students')}
+                  className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'students'
+                      ? 'bg-ink text-canvas shadow-md'
+                      : 'hover:bg-surface-muted text-ink-soft '
+                  }`}
+                >
+                  <Users className="w-4 h-4 shrink-0" />
+                  Students
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('attendance')}
+                  className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'attendance'
+                      ? 'bg-ink text-canvas shadow-md'
+                      : 'hover:bg-surface-muted text-ink-soft '
+                  }`}
+                >
+                  <CalendarCheck2 className="w-4 h-4 shrink-0" />
+                  Attendance
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('marks')}
+                  className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'marks'
+                      ? 'bg-ink text-canvas shadow-md'
+                      : 'hover:bg-surface-muted text-ink-soft '
+                  }`}
+                >
+                  <BookOpenCheck className="w-4 h-4 shrink-0" />
+                  Marks
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('calendar')}
+                  className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === 'calendar'
+                      ? 'bg-ink text-canvas shadow-md'
+                      : 'hover:bg-surface-muted text-ink-soft '
+                  }`}
+                >
+                  <CalendarPlus className="w-4 h-4 shrink-0" />
+                  Calendar
                 </button>
                   <button
                     onClick={() => setActiveTab('siteContent')}
@@ -1575,6 +1632,18 @@ export default function AdminPanel({ isOpen, onClose, data, onSave }: AdminPanel
                         </div>
                       </div>
                     )}
+
+                    {/* Student Portal: Students */}
+                    {activeTab === 'students' && <AdminStudents onAuthError={handleLogout} />}
+
+                    {/* Student Portal: Attendance */}
+                    {activeTab === 'attendance' && <AdminAttendance onAuthError={handleLogout} />}
+
+                    {/* Student Portal: Marks */}
+                    {activeTab === 'marks' && <AdminMarks onAuthError={handleLogout} />}
+
+                    {/* Student Portal: Calendar */}
+                    {activeTab === 'calendar' && <AdminCalendar onAuthError={handleLogout} />}
 
                     {activeTab === 'mailbox' && (
                       <div className="space-y-6">
